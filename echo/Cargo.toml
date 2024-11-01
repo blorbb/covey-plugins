@@ -1,0 +1,11 @@
+[package]
+name = "echo"
+version = "0.1.0"
+edition = "2021"
+metadata.workspace = true
+
+[dependencies]
+qpmu-api.workspace = true
+
+[lib]
+crate-type = ["cdylib"]

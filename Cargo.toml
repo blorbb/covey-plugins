@@ -1,0 +1,13 @@
+[workspace]
+members = ["echo"]
+resolver = "2"
+
+[workspace.dependencies]
+qpmu-api = { path = "../qpmu/qpmu-api" }
+
+[profile.release]
+codegen-units = 1
+opt-level = "s"
+debug = false
+strip = true
+lto = true
