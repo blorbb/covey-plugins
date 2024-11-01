@@ -71,13 +71,19 @@ static ENTRIES: LazyLock<Vec<ListItem>> = LazyLock::new(|| {
         .collect()
 });
 
+static KDOTOOL_PATH: LazyLock<String> = LazyLock::new(|| {
+    let mut s = std::env::var("HOME").expect("HOME variable must be set");
+    s.push_str("/.cargo/bin/kdotool");
+    s
+});
+
 struct AppSwitcher;
 
 /// Tries to open the window using kdotool, returning None if it fails.
 fn activate_kdotool(class: &str) -> Option<()> {
     dbg!(class);
     let out = host::spawn(
-        "kdotool",
+        &KDOTOOL_PATH,
         &["search", "--limit", "1", "--class", class],
         Capture::STDOUT,
     )
@@ -89,7 +95,7 @@ fn activate_kdotool(class: &str) -> Option<()> {
     };
 
     host::spawn(
-        "kdotool",
+        &KDOTOOL_PATH,
         ["windowactivate", String::from_utf8(out.stdout).ok()?.trim()],
         Capture::empty(),
     )
