@@ -1,12 +1,14 @@
-use qpmu_api::{export, host::{self, Capture}, Plugin};
+use qpmu_api::{export, ListItem, Plugin};
 
 struct Echo;
 
 impl Plugin for Echo {
-    fn test(name: String) -> Vec<String> {
-        let output = host::spawn("echo", &[name], Capture::STDOUT);
-
-        vec![format!("{output:?}")]
+    fn input(query: String) -> Vec<ListItem> {
+        vec![ListItem {
+            title: query,
+            description: String::new(),
+            metadata: String::new(),
+        }]
     }
 }
 
