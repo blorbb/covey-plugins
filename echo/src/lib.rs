@@ -1,4 +1,4 @@
-use qpmu_api::{export, ListItem, Plugin};
+use qpmu_api::{export, ListItem, Plugin, PluginAction};
 
 struct Echo;
 
@@ -9,6 +9,10 @@ impl Plugin for Echo {
             description: String::new(),
             metadata: String::new(),
         }]
+    }
+
+    fn activate(_: ListItem) -> Vec<PluginAction> {
+        vec![]
     }
 }
 

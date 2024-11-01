@@ -1,7 +1,7 @@
 use std::{fs, sync::LazyLock};
 
 use freedesktop_entry_parser as desktop;
-use qpmu_api::{export, ListItem, Plugin};
+use qpmu_api::{export, ListItem, Plugin, PluginAction};
 
 static ENTRIES: LazyLock<Vec<ListItem>> = LazyLock::new(|| {
     let Ok(entries) = fs::read_dir("/usr/share/applications") else {
@@ -19,7 +19,11 @@ static ENTRIES: LazyLock<Vec<ListItem>> = LazyLock::new(|| {
                     .attr("Comment")
                     .unwrap_or_default()
                     .to_string(),
-                metadata: entry.section("Desktop Entry").attr("Exec")?.to_string(),
+                metadata: entry
+                    .section("Desktop Entry")
+                    .attr("Exec")?
+                    .replace("%u", "")
+                    .replace("%U", ""),
             })
         })
         .collect()
@@ -33,6 +37,10 @@ impl Plugin for AppSwitcher {
         entries.sort_by_cached_key(|k| sublime_fuzzy::best_match(&query, &k.title));
         entries.reverse();
         entries
+    }
+
+    fn activate(selected: ListItem) -> Vec<PluginAction> {
+        vec![PluginAction::Close, PluginAction::RunCommandString(selected.metadata)]
     }
 }
 
