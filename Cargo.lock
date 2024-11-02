@@ -168,6 +168,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "qalc"
+version = "0.1.0"
+dependencies = [
+ "qpmu-api",
+]
+
+[[package]]
 name = "qpmu-api"
 version = "0.1.0"
 dependencies = [
