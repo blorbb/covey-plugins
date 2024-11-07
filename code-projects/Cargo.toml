@@ -1,0 +1,14 @@
+[package]
+name = "code-projects"
+version = "0.1.0"
+edition = "2021"
+metadata.workspace = true
+
+[dependencies]
+qpmu-api.workspace = true
+serde = { version = "1.0.214", features = ["derive"] }
+serde-json-wasm = "1.0.1"
+sublime_fuzzy = "0.7.0"
+
+[lib]
+crate-type = ["cdylib"]
