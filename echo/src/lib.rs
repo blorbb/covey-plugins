@@ -1,19 +1,15 @@
-use qpmu_api::{export, ListItem, Plugin, PluginAction};
+use qpmu_api::{anyhow::Result, register, ListItem, Plugin, PluginAction, QueryResult};
 
 struct Echo;
 
 impl Plugin for Echo {
-    fn input(query: String) -> Vec<ListItem> {
-        vec![ListItem {
-            title: query,
-            description: String::new(),
-            metadata: String::new(),
-        }]
+    fn query(query: String) -> Result<QueryResult> {
+        Ok(QueryResult::SetList(vec![ListItem::new(query)]))
     }
 
-    fn activate(_: ListItem) -> Vec<PluginAction> {
-        vec![]
+    fn activate(_: ListItem) -> Result<impl IntoIterator<Item = PluginAction>> {
+        Ok([])
     }
 }
 
-export!(Echo with_types_in qpmu_api::bindings);
+register!(Echo);

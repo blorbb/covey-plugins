@@ -2,9 +2,9 @@ use std::{cmp, fs, sync::LazyLock};
 
 use freedesktop_entry_parser as desktop;
 use qpmu_api::{
-    export,
+    anyhow::{bail, Result},
     host::{self, Capture},
-    ListItem, Plugin, PluginAction,
+    register, ListItem, Plugin, PluginAction, QueryResult,
 };
 
 const USELESS_CATEGORIES: [&str; 7] = [
@@ -81,33 +81,31 @@ static KDOTOOL_PATH: LazyLock<String> = LazyLock::new(|| {
 struct AppSwitcher;
 
 /// Tries to open the window using kdotool, returning None if it fails.
-fn activate_kdotool(class: &str) -> Option<()> {
+fn activate_kdotool(class: &str) -> Result<()> {
     dbg!(class);
     let out = host::spawn(
         &KDOTOOL_PATH,
         &["search", "--limit", "1", "--class", class],
         Capture::STDOUT,
-    )
-    .ok()?;
+    )?;
 
     // prints an empty string if nothing matches
     if out.stdout.is_empty() {
-        return None;
+        bail!("window not found")
     };
 
     host::spawn(
         &KDOTOOL_PATH,
-        ["windowactivate", String::from_utf8(out.stdout).ok()?.trim()],
+        ["windowactivate", String::from_utf8(out.stdout)?.trim()],
         Capture::empty(),
-    )
-    .ok()?;
+    )?;
 
-    Some(())
+    Ok(())
 }
 
 impl Plugin for AppSwitcher {
-    fn input(query: String) -> Vec<ListItem> {
-        let entries = ENTRIES.clone();
+    fn query(query: String) -> Result<QueryResult> {
+        let entries = &*ENTRIES;
         let mut entries: Vec<_> = entries
             .into_iter()
             // filter out anything that doesn't even closely match
@@ -116,22 +114,26 @@ impl Plugin for AppSwitcher {
 
         entries.sort_unstable_by_key(|(score, _)| cmp::Reverse(*score));
 
-        entries.into_iter().map(|(_, li)| li).collect()
+        Ok(QueryResult::SetList(
+            entries.into_iter().map(|(_, li)| li).cloned().collect(),
+        ))
     }
 
-    fn activate(selected: ListItem) -> Vec<PluginAction> {
+    fn activate(selected: ListItem) -> Result<impl IntoIterator<Item = PluginAction>> {
         let (exec_cmd, class) = selected.metadata.split_once('\n').unwrap();
+
         if !class.is_empty() {
             // try and activate it with kdotool
-            if activate_kdotool(class).is_some() {
-                return vec![PluginAction::Close];
+            if activate_kdotool(class).is_ok() {
+                return Ok(vec![PluginAction::Close]);
             }
         }
-        vec![
+
+        Ok(vec![
             PluginAction::Close,
             PluginAction::RunCommandString(exec_cmd.to_string()),
-        ]
+        ])
     }
 }
 
-export!(AppSwitcher with_types_in qpmu_api::bindings);
+register!(AppSwitcher);
