@@ -17,7 +17,10 @@ impl Plugin for Qalc {
         };
 
         vec![ListItem {
-            title: String::from_utf8(output.stdout).expect("TODO").trim().to_string(),
+            title: String::from_utf8(output.stdout)
+                .expect("TODO")
+                .trim()
+                .to_string(),
             description: String::new(),
             metadata: String::new(),
         }]

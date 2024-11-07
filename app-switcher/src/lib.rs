@@ -2,9 +2,7 @@ use std::{cmp, fs, sync::LazyLock};
 
 use freedesktop_entry_parser as desktop;
 use qpmu_api::{
-    export,
-    host::{self, Capture},
-    ListItem, Plugin, PluginAction,
+    export, host::{self, Capture}, ListItem, Plugin, PluginAction
 };
 
 const USELESS_CATEGORIES: [&str; 7] = [
