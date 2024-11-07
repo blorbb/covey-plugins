@@ -2,7 +2,9 @@ use std::{cmp, fs, sync::LazyLock};
 
 use freedesktop_entry_parser as desktop;
 use qpmu_api::{
-    export, host::{self, Capture}, ListItem, Plugin, PluginAction
+    export,
+    host::{self, Capture},
+    ListItem, Plugin, PluginAction,
 };
 
 const USELESS_CATEGORIES: [&str; 7] = [
@@ -56,15 +58,16 @@ static ENTRIES: LazyLock<Vec<ListItem>> = LazyLock::new(|| {
                     .unwrap_or(&file_stem)
             );
 
-            Some(ListItem {
-                title: entry.section("Desktop Entry").attr("Name")?.to_string(),
-                description: entry
-                    .section("Desktop Entry")
-                    .attr("Comment")
-                    .unwrap_or_default()
-                    .to_string(),
-                metadata,
-            })
+            Some(
+                ListItem::new(entry.section("Desktop Entry").attr("Name")?)
+                    .with_description(
+                        entry
+                            .section("Desktop Entry")
+                            .attr("Comment")
+                            .unwrap_or_default(),
+                    )
+                    .with_metadata(metadata),
+            )
         })
         .collect()
 });
