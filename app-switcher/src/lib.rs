@@ -131,7 +131,7 @@ impl Plugin for AppSwitcher {
 
         Ok(vec![
             PluginAction::Close,
-            PluginAction::RunCommandString(exec_cmd.to_string()),
+            PluginAction::RunShell(exec_cmd.to_string()),
         ])
     }
 }
