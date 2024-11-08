@@ -1,10 +1,9 @@
-use std::{cmp, fs, sync::LazyLock};
+use std::{fs, sync::LazyLock};
 
 use freedesktop_entry_parser as desktop;
 use qpmu_api::{
     anyhow::{bail, Result},
-    host::{self, Capture},
-    register, ListItem, Plugin, PluginAction, QueryResult,
+    host, register, Capture, ListItem, Plugin, PluginAction, QueryResult, Weights,
 };
 
 const USELESS_CATEGORIES: [&str; 7] = [
@@ -105,18 +104,11 @@ fn activate_kdotool(class: &str) -> Result<()> {
 
 impl Plugin for AppSwitcher {
     fn query(query: String) -> Result<QueryResult> {
-        let entries = &*ENTRIES;
-        let mut entries: Vec<_> = entries
-            .into_iter()
-            // filter out anything that doesn't even closely match
-            .filter_map(|li| Some((sublime_fuzzy::best_match(&query, &li.title)?.score(), li)))
-            .collect();
-
-        entries.sort_unstable_by_key(|(score, _)| cmp::Reverse(*score));
-
-        Ok(QueryResult::SetList(
-            entries.into_iter().map(|(_, li)| li).cloned().collect(),
-        ))
+        Ok(QueryResult::SetList(host::rank(
+            &query,
+            &*ENTRIES,
+            Weights::default(),
+        )))
     }
 
     fn activate(selected: ListItem) -> Result<impl IntoIterator<Item = PluginAction>> {

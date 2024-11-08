@@ -8,7 +8,6 @@ metadata.workspace = true
 qpmu-api.workspace = true
 serde = { version = "1.0.214", features = ["derive"] }
 serde-json-wasm = "1.0.1"
-sublime_fuzzy = "0.7.0"
 
 [lib]
 crate-type = ["cdylib"]

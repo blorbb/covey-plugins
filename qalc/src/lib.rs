@@ -1,5 +1,6 @@
 use qpmu_api::{
-    anyhow::Result, host::{self, Capture}, register, DeferredAction, DeferredResult, ListItem, Plugin, PluginAction, QueryResult
+    anyhow::Result, host, register, Capture, DeferredAction, DeferredResult, ListItem, Plugin,
+    PluginAction, QueryResult,
 };
 
 struct Qalc;

@@ -26,7 +26,6 @@ version = "0.1.0"
 dependencies = [
  "freedesktop_entry_parser",
  "qpmu-api",
- "sublime_fuzzy",
 ]
 
 [[package]]
@@ -48,7 +47,6 @@ dependencies = [
  "qpmu-api",
  "serde",
  "serde-json-wasm",
- "sublime_fuzzy",
 ]
 
 [[package]]
@@ -268,12 +266,6 @@ checksum = "47317bbaf63785b53861e1ae2d11b80d6b624211d42cb20efcd210ee6f8a14bc"
 dependencies = [
  "smallvec",
 ]
-
-[[package]]
-name = "sublime_fuzzy"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa7986063f7c0ab374407e586d7048a3d5aac94f103f751088bf398e07cd5400"
 
 [[package]]
 name = "syn"
