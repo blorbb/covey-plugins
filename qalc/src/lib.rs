@@ -20,15 +20,16 @@ impl Plugin for Qalc {
 
         Ok(vec![
             PluginAction::Close,
-            PluginAction::Copy(String::from_utf8(output.stdout).unwrap().trim().to_string()),
+            PluginAction::Copy(String::from_utf8(output.stdout)?.trim().to_string()),
         ])
     }
 
     fn handle_deferred(_query: String, result: DeferredResult) -> Result<QueryResult> {
         match result {
             DeferredResult::ProcessOutput(output) => Ok(QueryResult::SetList(vec![ListItem::new(
-                String::from_utf8(output?.stdout)?,
-            )])),
+                String::from_utf8(output?.stdout)?.trim().to_string(),
+            )
+            .with_icon(Some("qalculate"))])),
         }
     }
 }

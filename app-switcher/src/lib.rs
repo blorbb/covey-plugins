@@ -33,6 +33,9 @@ static ENTRIES: LazyLock<Vec<ListItem>> = LazyLock::new(|| {
         .filter(|(_, entry)| {
             // NoDisplay=true desktop entries aren't for user use.
             entry.section("Desktop Entry").attr("NoDisplay") != Some("true")
+            // if there are no icons then it's probably not a user app.
+                && entry.section("Desktop Entry").has_attr("Icon")
+            // filter out based on categories
                 && entry
                     .section("Desktop Entry")
                     .attr("Categories")
@@ -65,7 +68,8 @@ static ENTRIES: LazyLock<Vec<ListItem>> = LazyLock::new(|| {
                             .attr("Comment")
                             .unwrap_or_default(),
                     )
-                    .with_metadata(metadata),
+                    .with_metadata(metadata)
+                    .with_icon(entry.section("Desktop Entry").attr("Icon")),
             )
         })
         .collect()
