@@ -1,4 +1,4 @@
-use std::{fs, sync::LazyLock};
+use std::{path::PathBuf, sync::LazyLock};
 
 use freedesktop_entry_parser as desktop;
 use qpmu_api::{
@@ -17,17 +17,17 @@ const USELESS_CATEGORIES: [&str; 7] = [
 ];
 
 static ENTRIES: LazyLock<Vec<ListItem>> = LazyLock::new(|| {
-    let Ok(entries) = fs::read_dir("/usr/share/applications") else {
+    let Ok(entries) = host::read_dir("/usr/share/applications") else {
         return vec![];
     };
 
     entries
         .into_iter()
-        .filter_map(Result::ok)
+        .map(PathBuf::from)
         .filter_map(|entry| {
             Some((
-                entry.path().file_stem()?.to_str()?.to_string(),
-                desktop::parse_entry(entry.path()).ok()?,
+                entry.file_stem()?.to_str()?.to_string(),
+                desktop::Entry::parse(host::read_file(entry).ok()?).ok()?,
             ))
         })
         .filter(|(_, entry)| {
