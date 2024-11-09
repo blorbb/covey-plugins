@@ -1,6 +1,6 @@
 use qpmu_api::{
-    anyhow::Result, host, register, Capture, DeferredAction, DeferredResult, InputLine, ListItem,
-    Plugin, PluginAction, QueryResult,
+    anyhow::Result, host, register, Action, Capture, DeferredAction, DeferredResult, InputLine,
+    ListItem, Plugin, QueryResult,
 };
 
 struct Qalc;
@@ -13,14 +13,14 @@ impl Plugin for Qalc {
         ))))
     }
 
-    fn activate(item: ListItem) -> Result<impl IntoIterator<Item = PluginAction>> {
+    fn activate(item: ListItem) -> Result<impl IntoIterator<Item = Action>> {
         let Ok(output) = host::spawn("qalc", ["-t", &item.metadata], Capture::STDOUT) else {
             return Ok(vec![]);
         };
 
         Ok(vec![
-            PluginAction::Close,
-            PluginAction::Copy(String::from_utf8(output.stdout)?.trim().to_string()),
+            Action::Close,
+            Action::Copy(String::from_utf8(output.stdout)?.trim().to_string()),
         ])
     }
 

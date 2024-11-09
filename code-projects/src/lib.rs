@@ -2,7 +2,7 @@ use std::{path::PathBuf, sync::LazyLock};
 
 use qpmu_api::{
     anyhow::{Context, Result},
-    host, register, ListItem, Plugin, PluginAction, QueryResult, Weights,
+    host, register, Action, ListItem, Plugin, QueryResult, Weights,
 };
 use serde::Deserialize;
 
@@ -39,11 +39,11 @@ impl Plugin for CodeProjects {
         )))
     }
 
-    fn activate(selected: ListItem) -> Result<impl IntoIterator<Item = PluginAction>> {
+    fn activate(selected: ListItem) -> Result<impl IntoIterator<Item = Action>> {
         // https://github.com/brpaz/ulauncher-vscode-projects/blob/master/vscode_projects/listeners/item_enter.py
         Ok([
-            PluginAction::Close,
-            PluginAction::RunCommand(("code".to_string(), vec![selected.description])),
+            Action::Close,
+            Action::RunCommand(("code".to_string(), vec![selected.description])),
         ])
     }
 }

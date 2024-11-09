@@ -3,7 +3,7 @@ use std::{path::PathBuf, sync::LazyLock};
 use freedesktop_entry_parser as desktop;
 use qpmu_api::{
     anyhow::{bail, Result},
-    host, register, Capture, ListItem, Plugin, PluginAction, QueryResult, Weights,
+    host, register, Action, Capture, ListItem, Plugin, QueryResult, Weights,
 };
 
 const USELESS_CATEGORIES: [&str; 7] = [
@@ -115,20 +115,17 @@ impl Plugin for AppSwitcher {
         )))
     }
 
-    fn activate(selected: ListItem) -> Result<impl IntoIterator<Item = PluginAction>> {
+    fn activate(selected: ListItem) -> Result<impl IntoIterator<Item = Action>> {
         let (exec_cmd, class) = selected.metadata.split_once('\n').unwrap();
 
         if !class.is_empty() {
             // try and activate it with kdotool
             if activate_kdotool(class).is_ok() {
-                return Ok(vec![PluginAction::Close]);
+                return Ok(vec![Action::Close]);
             }
         }
 
-        Ok(vec![
-            PluginAction::Close,
-            PluginAction::RunShell(exec_cmd.to_string()),
-        ])
+        Ok(vec![Action::Close, Action::RunShell(exec_cmd.to_string())])
     }
 }
 

@@ -1,4 +1,4 @@
-use qpmu_api::{anyhow::Result, register, ListItem, Plugin, PluginAction, QueryResult};
+use qpmu_api::{anyhow::Result, register, Action, ListItem, Plugin, QueryResult};
 
 struct Echo;
 
@@ -7,7 +7,7 @@ impl Plugin for Echo {
         Ok(QueryResult::SetList(vec![ListItem::new(query)]))
     }
 
-    fn activate(_: ListItem) -> Result<impl IntoIterator<Item = PluginAction>> {
+    fn activate(_: ListItem) -> Result<impl IntoIterator<Item = Action>> {
         Ok([])
     }
 }
