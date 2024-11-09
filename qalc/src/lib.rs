@@ -1,6 +1,6 @@
 use qpmu_api::{
-    anyhow::Result, host, register, Capture, DeferredAction, DeferredResult, ListItem, Plugin,
-    PluginAction, QueryResult,
+    anyhow::Result, host, register, Capture, DeferredAction, DeferredResult, InputLine, ListItem,
+    Plugin, PluginAction, QueryResult,
 };
 
 struct Qalc;
@@ -24,13 +24,22 @@ impl Plugin for Qalc {
         ])
     }
 
-    fn handle_deferred(_query: String, result: DeferredResult) -> Result<QueryResult> {
+    fn handle_deferred(query: String, result: DeferredResult) -> Result<QueryResult> {
         match result {
             DeferredResult::ProcessOutput(output) => Ok(QueryResult::SetList(vec![ListItem::new(
                 String::from_utf8(output?.stdout)?.trim().to_string(),
             )
+            .with_metadata(query)
             .with_icon(Some("qalculate"))])),
         }
+    }
+
+    fn complete(_query: String, selected: ListItem) -> Result<Option<InputLine>> {
+        let output = host::spawn("qalc", ["-t", &selected.metadata], Capture::STDOUT);
+
+        Ok(Some(InputLine::new(
+            String::from_utf8(output?.stdout)?.trim().to_string(),
+        )))
     }
 }
 
