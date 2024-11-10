@@ -515,6 +515,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "zealdoc"
+version = "0.1.0"
+dependencies = [
+ "qpmu-api",
+]
+
+[[package]]
 name = "zerocopy"
 version = "0.7.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
