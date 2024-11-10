@@ -37,9 +37,26 @@ impl Plugin for AppSwitcher {
             })
             .filter_map(|(file_stem, entry)| {
                 let entry = entry.section("Desktop Entry");
+                // https://specifications.freedesktop.org/desktop-entry-spec/latest/exec-variables.html
+                // lots of allocations but its a tiny string anyways, doesn't matter
+                let exec = entry
+                    .attr("Exec")?
+                    .replace("%u", "")
+                    .replace("%U", "")
+                    .replace("%f", "")
+                    .replace("%F", "")
+                    .replace(
+                        "%i",
+                        &entry
+                            .attr("Icon")
+                            .map_or_else(String::new, |icon| format!("--icon {icon}")),
+                    )
+                    .replace("%c", entry.attr("Name").unwrap_or_default())
+                    .replace("%k", "");
+
                 let metadata = format!(
                     "{}\n{}",
-                    entry.attr("Exec")?.replace("%u", "").replace("%U", ""),
+                    exec,
                     entry.attr("StartupWMClass").unwrap_or(&file_stem)
                 );
 
