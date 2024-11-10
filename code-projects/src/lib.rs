@@ -21,7 +21,11 @@ struct Data {
 struct CodeProjects;
 
 impl Plugin for CodeProjects {
-    fn query(query: String) -> Result<QueryResult> {
+    fn new(_: String) -> Result<Self> {
+        Ok(Self)
+    }
+
+    fn query(&mut self, query: String) -> Result<QueryResult> {
         let path = host::read_file(&*PROJECTS_PATH)
             .context("could not open project-manager projects data")?;
         let value: Vec<Data> = serde_json_wasm::from_slice(&path)
@@ -39,7 +43,7 @@ impl Plugin for CodeProjects {
         )))
     }
 
-    fn activate(selected: ListItem) -> Result<impl IntoIterator<Item = Action>> {
+    fn activate(&mut self, selected: ListItem) -> Result<impl IntoIterator<Item = Action>> {
         // https://github.com/brpaz/ulauncher-vscode-projects/blob/master/vscode_projects/listeners/item_enter.py
         Ok([
             Action::Close,

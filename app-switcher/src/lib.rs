@@ -107,7 +107,11 @@ fn activate_kdotool(class: &str) -> Result<()> {
 }
 
 impl Plugin for AppSwitcher {
-    fn query(query: String) -> Result<QueryResult> {
+    fn new(_: String) -> Result<Self> {
+        Ok(Self)
+    }
+
+    fn query(&mut self, query: String) -> Result<QueryResult> {
         Ok(QueryResult::SetList(host::rank(
             &query,
             &*ENTRIES,
@@ -115,7 +119,7 @@ impl Plugin for AppSwitcher {
         )))
     }
 
-    fn activate(selected: ListItem) -> Result<impl IntoIterator<Item = Action>> {
+    fn activate(&mut self, selected: ListItem) -> Result<impl IntoIterator<Item = Action>> {
         let (exec_cmd, class) = selected.metadata.split_once('\n').unwrap();
 
         if !class.is_empty() {
