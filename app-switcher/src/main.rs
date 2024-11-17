@@ -1,25 +1,22 @@
-use std::{path::PathBuf, process::Stdio, sync::LazyLock};
+use std::{process::Stdio, sync::LazyLock};
 
 use anyhow::{bail, Result};
-use freedesktop_entry_parser as desktop;
+use freedesktop_desktop_entry::{self as desktop, DesktopEntry};
 use qpmu_api::*;
 
 struct AppSwitcher {
     entries: Vec<ListItem>,
 }
 
-async fn parse_file(path: PathBuf) -> Option<ListItem> {
-    let entry =
-        desktop::Entry::parse(tokio::fs::read(path.canonicalize().ok()?).await.ok()?).ok()?;
-    let entry = entry.section("Desktop Entry");
-
+fn process_entry(entry: DesktopEntry<'_>, locales: &[impl AsRef<str>]) -> Option<ListItem> {
     // filter out some desktop entries that are probably irrelevant
     // has NoDisplay, or no Icon attribute, or all it's categories are useless.
-    if entry.attr("NoDisplay") == Some("true")
-        || !entry.has_attr("Icon")
-        || entry.attr("Categories").is_none_or(|cats| {
-            cats.split_terminator(';')
+    if entry.no_display()
+        || entry.icon().is_none()
+        || entry.categories().is_none_or(|cats| {
+            cats.into_iter()
                 .filter(|cat| !USELESS_CATEGORIES.contains(cat))
+                .filter(|cat| !cat.is_empty())
                 .count()
                 == 0
         })
@@ -29,45 +26,28 @@ async fn parse_file(path: PathBuf) -> Option<ListItem> {
 
     // https://specifications.freedesktop.org/desktop-entry-spec/latest/exec-variables.html
     // lots of allocations but its a tiny string anyways, doesn't matter
-    let exec = entry
-        .attr("Exec")?
-        .replace("%u", "")
-        .replace("%U", "")
-        .replace("%f", "")
-        .replace("%F", "")
-        .replace(
-            "%i",
-            &entry
-                .attr("Icon")
-                .map_or_else(String::new, |icon| format!("--icon {icon}")),
-        )
-        .replace("%c", entry.attr("Name").unwrap_or_default())
-        .replace("%k", "");
+    let exec = entry.parse_exec().ok()?.join(" ");
 
     let metadata = format!(
         "{}\n{}",
         exec,
-        entry
-            .attr("StartupWMClass")
-            .unwrap_or(path.file_stem()?.to_str()?)
+        entry.startup_wm_class().unwrap_or(entry.id())
     );
 
     Some(
-        ListItem::new(entry.attr("Name")?)
-            .with_description(entry.attr("Comment").unwrap_or_default())
+        ListItem::new(entry.name(locales)?)
+            .with_description(entry.comment(locales).unwrap_or_default())
             .with_metadata(metadata)
-            .with_icon(entry.attr("Icon")),
+            .with_icon(entry.icon()),
     )
 }
 
 impl Plugin for AppSwitcher {
     async fn new(_: String) -> Result<Self> {
+        let locales = desktop::get_languages_from_env();
         let mut entries = Vec::new();
-
-        let mut read_dir = tokio::fs::read_dir("/usr/share/applications").await?;
-
-        while let Some(file) = read_dir.next_entry().await? {
-            entries.extend(parse_file(file.path()).await);
+        for entry in desktop::Iter::new(desktop::default_paths()).entries(Some(&locales)) {
+            entries.extend(process_entry(entry, &locales));
         }
 
         Ok(Self { entries })
