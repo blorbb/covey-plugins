@@ -40,8 +40,8 @@ impl Plugin for Latex {
         Ok(vec![Action::Close, Action::Copy(selected.title)])
     }
 
-    async fn complete(&self, _: String, selected: ListItem) -> Result<Option<InputLine>> {
-        Ok(Some(InputLine::new(selected.description)))
+    async fn complete(&self, _: String, selected: ListItem) -> Result<Option<Input>> {
+        Ok(Some(Input::new(selected.description)))
     }
 }
 

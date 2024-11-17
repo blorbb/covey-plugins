@@ -46,8 +46,8 @@ impl Plugin for Qalc {
         ])
     }
 
-    async fn complete(&self, _query: String, selected: ListItem) -> Result<Option<InputLine>> {
-        Ok(Some(InputLine::new(
+    async fn complete(&self, _query: String, selected: ListItem) -> Result<Option<Input>> {
+        Ok(Some(Input::new(
             get_terse_qalc_output(&selected.metadata).await?,
         )))
     }

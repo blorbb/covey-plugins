@@ -58,7 +58,7 @@ impl Plugin for Open {
                 .complete(String::new(), selected)
                 .await?
                 .expect("complete should return string as metadata is non empty");
-            return Ok(vec![Action::SetInputLine(input)]);
+            return Ok(vec![Action::SetInput(input)]);
         }
 
         // actually go to the url
@@ -69,7 +69,7 @@ impl Plugin for Open {
         ])
     }
 
-    async fn complete(&self, _: String, selected: ListItem) -> Result<Option<InputLine>> {
+    async fn complete(&self, _: String, selected: ListItem) -> Result<Option<Input>> {
         // if it has metadata, still typing the prefix.
         // complete the prefix selected.
         if selected.metadata.is_empty() {
@@ -81,7 +81,7 @@ impl Plugin for Open {
             .expect("metadata should be an int");
 
         let prefix = &self.urls[index].0;
-        Ok(Some(InputLine::new(format!("{prefix} "))))
+        Ok(Some(Input::new(format!("{prefix} "))))
     }
 }
 

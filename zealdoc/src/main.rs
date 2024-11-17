@@ -80,7 +80,7 @@ impl Plugin for Zealdoc {
 
     async fn activate(&self, selected: ListItem) -> Result<Vec<Action>> {
         if selected.metadata.is_empty() {
-            return Ok(vec![Action::SetInputLine(
+            return Ok(vec![Action::SetInput(
                 self.complete(String::new(), selected)
                     .await?
                     .expect("complete always completes"),
@@ -96,13 +96,13 @@ impl Plugin for Zealdoc {
         ])
     }
 
-    async fn complete(&self, _: String, selected: ListItem) -> Result<Option<InputLine>> {
+    async fn complete(&self, _: String, selected: ListItem) -> Result<Option<Input>> {
         if selected.metadata.is_empty() {
             // no language selected yet, autocomplete the language
-            Ok(Some(InputLine::new(format!("{}:", selected.title))))
+            Ok(Some(Input::new(format!("{}:", selected.title))))
         } else {
             // language selected, complete the language and query
-            Ok(Some(InputLine::new(format!(
+            Ok(Some(Input::new(format!(
                 "{}:{}",
                 selected.metadata, selected.title
             ))))
