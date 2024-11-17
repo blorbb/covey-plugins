@@ -6,3 +6,4 @@ metadata.workspace = true
 
 [dependencies]
 qpmu-api.workspace = true
+tokio = "1.41.1"

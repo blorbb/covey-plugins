@@ -215,6 +215,7 @@ name = "echo"
 version = "0.1.0"
 dependencies = [
  "qpmu-api",
+ "tokio",
 ]
 
 [[package]]
