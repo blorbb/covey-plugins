@@ -6,6 +6,3 @@ metadata.workspace = true
 
 [dependencies]
 qpmu-api.workspace = true
-
-[lib]
-crate-type = ["cdylib"]
