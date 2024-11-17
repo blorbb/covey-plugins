@@ -1,4 +1,6 @@
-use qpmu_api::{anyhow::Result, Action, ListItem, Plugin};
+use std::time::Duration;
+
+use qpmu_api::{anyhow::Result, tokio, Action, ListItem, Plugin};
 
 struct Echo;
 
@@ -8,10 +10,11 @@ impl Plugin for Echo {
     }
 
     async fn query(&self, query: String) -> Result<Vec<ListItem>> {
+        tokio::time::sleep(Duration::from_secs(1)).await;
         Ok(vec![ListItem::new(query)])
     }
 
-    async fn activate(&self, query: ListItem) -> Result<Vec<Action>> {
+    async fn activate(&self, _query: ListItem) -> Result<Vec<Action>> {
         Ok(vec![])
     }
 }

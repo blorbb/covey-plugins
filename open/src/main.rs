@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use qpmu_api::{anyhow::Result, host, Action, InputLine, ListItem, Plugin, QueryResult, Weights};
+use anyhow::Result;
+use qpmu_api::*;
 use serde::Deserialize;
 
 struct Open {
@@ -14,14 +15,14 @@ struct OpenTarget {
 }
 
 impl Plugin for Open {
-    fn new(config: String) -> Result<Self> {
+    async fn new(config: String) -> Result<Self> {
         let urls: HashMap<String, OpenTarget> = toml::from_str(&config)?;
         Ok(Self {
             urls: urls.into_iter().collect(),
         })
     }
 
-    fn query(&mut self, query: String) -> Result<QueryResult> {
+    async fn query(&self, query: String) -> Result<Vec<ListItem>> {
         if let Some((new_query, target)) = self.urls.iter().find_map(|(prefix, target)| {
             query
                 .strip_prefix(prefix)
@@ -32,7 +33,7 @@ impl Plugin for Open {
             let search = ListItem::new(format!("Search {} for {}", target.name, new_query))
                 .with_description(target.url.replace("%s", new_query));
 
-            Ok(QueryResult::SetList(vec![search]))
+            Ok(vec![search])
         } else {
             // query doesn't match any prefix in the list: rank them
             let items = self
@@ -46,15 +47,16 @@ impl Plugin for Open {
                 })
                 .collect::<Vec<_>>();
 
-            let ranking = host::rank(&query, &items, Weights::default());
-            Ok(QueryResult::SetList(ranking))
+            let ranking = rank::rank(&query, &items, rank::Weights::default());
+            Ok(ranking)
         }
     }
 
-    fn activate(&mut self, selected: ListItem) -> Result<impl IntoIterator<Item = Action>> {
+    async fn activate(&self, selected: ListItem) -> Result<Vec<Action>> {
         if !selected.metadata.is_empty() {
             let input = self
-                .complete(String::new(), selected)?
+                .complete(String::new(), selected)
+                .await?
                 .expect("complete should return string as metadata is non empty");
             return Ok(vec![Action::SetInputLine(input)]);
         }
@@ -63,11 +65,11 @@ impl Plugin for Open {
         let url = selected.description;
         Ok(vec![
             Action::Close,
-            Action::RunCommand(("xdg-open".to_owned(), vec![url])),
+            Action::RunCommand("xdg-open".to_owned(), vec![url]),
         ])
     }
 
-    fn complete(&mut self, _: String, selected: ListItem) -> Result<Option<InputLine>> {
+    async fn complete(&self, _: String, selected: ListItem) -> Result<Option<InputLine>> {
         // if it has metadata, still typing the prefix.
         // complete the prefix selected.
         if selected.metadata.is_empty() {
@@ -83,4 +85,6 @@ impl Plugin for Open {
     }
 }
 
-qpmu_api::register!(Open);
+fn main() {
+    qpmu_api::main::<Open>()
+}

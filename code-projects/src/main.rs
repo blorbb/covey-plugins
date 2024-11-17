@@ -1,13 +1,12 @@
 use std::{path::PathBuf, sync::LazyLock};
 
-use qpmu_api::{
-    anyhow::{Context, Result},
-    host, register, Action, ListItem, Plugin, QueryResult, Weights,
-};
+use anyhow::{Context, Result};
+use qpmu_api::*;
 use serde::Deserialize;
+use tokio::fs;
 
 static PROJECTS_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
-    let config_dir = host::config_dir();
+    let config_dir = dirs::config_dir().unwrap();
     config_dir.join("Code/User/globalStorage/alefragnani.project-manager/projects.json")
 });
 
@@ -21,35 +20,34 @@ struct Data {
 struct CodeProjects;
 
 impl Plugin for CodeProjects {
-    fn new(_: String) -> Result<Self> {
+    async fn new(_: String) -> Result<Self> {
         Ok(Self)
     }
 
-    fn query(&mut self, query: String) -> Result<QueryResult> {
-        let path = host::read_file(&*PROJECTS_PATH)
+    async fn query(&self, query: String) -> Result<Vec<ListItem>> {
+        let path = fs::read(&*PROJECTS_PATH)
+            .await
             .context("could not open project-manager projects data")?;
-        let value: Vec<Data> = serde_json_wasm::from_slice(&path)
-            .context("failed to parse project-manager projects")?;
+        let value: Vec<Data> =
+            serde_json::from_slice(&path).context("failed to parse project-manager projects")?;
 
         let list = value
             .into_iter()
             .map(|value| ListItem::new(value.name).with_description(value.root_path))
             .collect::<Vec<_>>();
 
-        Ok(QueryResult::SetList(host::rank(
-            &query,
-            &list,
-            Weights::default(),
-        )))
+        Ok(rank::rank(&query, &list, rank::Weights::default()))
     }
 
-    fn activate(&mut self, selected: ListItem) -> Result<impl IntoIterator<Item = Action>> {
+    async fn activate(&self, selected: ListItem) -> Result<Vec<Action>> {
         // https://github.com/brpaz/ulauncher-vscode-projects/blob/master/vscode_projects/listeners/item_enter.py
-        Ok([
+        Ok(vec![
             Action::Close,
-            Action::RunCommand(("code".to_string(), vec![selected.description])),
+            Action::RunCommand("code".to_string(), vec![selected.description]),
         ])
     }
 }
 
-register!(CodeProjects);
+fn main() {
+    qpmu_api::main::<CodeProjects>();
+}
