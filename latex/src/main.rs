@@ -10,7 +10,7 @@ struct Latex {
 }
 
 impl Plugin for Latex {
-    fn new(_: String) -> Result<Self> {
+    async fn new(_: String) -> Result<Self> {
         let info: Vec<_> = include_str!("../mapping.csv")
             .lines()
             .map(|line| {
@@ -23,26 +23,28 @@ impl Plugin for Latex {
         Ok(Latex { info })
     }
 
-    fn query(&mut self, query: String) -> Result<QueryResult> {
-        let ranking = host::rank(
+    async fn query(&self, query: String) -> Result<Vec<ListItem>> {
+        let ranking = rank::rank(
             &query,
             &self.info,
-            Weights::default().title(0.0).description(1.0),
+            rank::Weights::default().title(0.0).description(1.0),
         )
         .into_iter()
         .take(100)
         .collect();
 
-        Ok(QueryResult::SetList(ranking))
+        Ok(ranking)
     }
 
-    fn activate(&mut self, selected: ListItem) -> Result<impl IntoIterator<Item = Action>> {
-        Ok([Action::Close, Action::Copy(selected.title)])
+    async fn activate(&self, selected: ListItem) -> Result<Vec<Action>> {
+        Ok(vec![Action::Close, Action::Copy(selected.title)])
     }
 
-    fn complete(&mut self, _: String, selected: ListItem) -> Result<Option<InputLine>> {
+    async fn complete(&self, _: String, selected: ListItem) -> Result<Option<InputLine>> {
         Ok(Some(InputLine::new(selected.description)))
     }
 }
 
-register!(Latex);
+fn main() {
+    qpmu_api::main::<Latex>();
+}

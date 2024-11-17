@@ -5,6 +5,4 @@ edition = "2021"
 
 [dependencies]
 qpmu-api.workspace = true
-
-[lib]
-crate-type = ["cdylib"]
+tokio = { version = "1.41.1", features = ["process"] }

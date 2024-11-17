@@ -7,6 +7,3 @@ edition = "2021"
 qpmu-api.workspace = true
 serde = { version = "1.0.214", features = ["derive"] }
 toml = { version = "0.8.19", default-features = false, features = ["parse"] }
-
-[lib]
-crate-type = ["cdylib"]

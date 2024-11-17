@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+dirs = "5.0.1"
 qpmu-api.workspace = true
-
-[lib]
-crate-type = ["cdylib"]
+tokio = { version = "1.41.1", features = ["fs", "process"] }
+tokio-stream = { version = "0.1.16", features = ["fs"] }
