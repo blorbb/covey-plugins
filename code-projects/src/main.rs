@@ -36,7 +36,7 @@ impl Plugin for CodeProjects {
             .map(|value| ListItem::new(value.name).with_description(value.root_path))
             .collect::<Vec<_>>();
 
-        Ok(rank::rank(&query, &list, rank::Weights::default()))
+        Ok(rank::rank(&query, &list, rank::Weights::with_history()).await)
     }
 
     async fn activate(&self, selected: ListItem) -> Result<Vec<Action>> {

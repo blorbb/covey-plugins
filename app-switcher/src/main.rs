@@ -54,7 +54,7 @@ impl Plugin for AppSwitcher {
     }
 
     async fn query(&self, query: String) -> Result<Vec<ListItem>> {
-        Ok(rank::rank(&query, &self.entries, rank::Weights::default()))
+        Ok(rank::rank(&query, &self.entries, rank::Weights::with_history()).await)
     }
 
     async fn activate(&self, selected: ListItem) -> Result<Vec<Action>> {

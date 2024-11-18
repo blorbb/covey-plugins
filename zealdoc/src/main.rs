@@ -74,7 +74,7 @@ impl Plugin for Zealdoc {
                 .map(|docset| ListItem::new(&docset.lang).with_icon(Some("zeal")))
                 .collect();
 
-            Ok(rank::rank(&query, &list_items, rank::Weights::default()))
+            Ok(rank::rank(&query, &list_items, rank::Weights::with_history()).await)
         }
     }
 

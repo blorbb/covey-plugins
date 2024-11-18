@@ -47,7 +47,7 @@ impl Plugin for Open {
                 })
                 .collect::<Vec<_>>();
 
-            let ranking = rank::rank(&query, &items, rank::Weights::default());
+            let ranking = rank::rank(&query, &items, rank::Weights::with_history()).await;
             Ok(ranking)
         }
     }

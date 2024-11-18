@@ -27,8 +27,11 @@ impl Plugin for Latex {
         let ranking = rank::rank(
             &query,
             &self.info,
-            rank::Weights::default().title(0.0).description(1.0),
+            rank::Weights::with_history()
+                .title(0.0)
+                .description(1.0),
         )
+        .await
         .into_iter()
         .take(100)
         .collect();
