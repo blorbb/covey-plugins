@@ -1,7 +1,7 @@
 use std::process::Stdio;
 
 use anyhow::Context;
-use qpmu_api::{anyhow::Result, *};
+use qpmu_plugin::{anyhow::Result, *};
 use tokio::{fs, process::Command};
 use tokio_stream::{wrappers::ReadDirStream, StreamExt};
 
@@ -119,5 +119,5 @@ fn sql_query(query: &str) -> String {
 }
 
 fn main() {
-    qpmu_api::main::<Zealdoc>()
+    qpmu_plugin::main::<Zealdoc>()
 }

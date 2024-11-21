@@ -1,7 +1,7 @@
 use std::process::Stdio;
 
 use anyhow::Result;
-use qpmu_api::*;
+use qpmu_plugin::*;
 use tokio::process::Command;
 
 struct Qalc;
@@ -72,5 +72,5 @@ impl Plugin for Qalc {
 }
 
 fn main() {
-    qpmu_api::main::<Qalc>()
+    qpmu_plugin::main::<Qalc>()
 }

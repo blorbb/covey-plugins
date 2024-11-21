@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-qpmu-api.workspace = true
+qpmu-plugin.workspace = true
 tokio = { version = "1.41.1", features = ["process"] }

@@ -3,7 +3,7 @@ members = ["echo", "app-switcher", "qalc", "code-projects", "open", "zealdoc", "
 resolver = "2"
 
 [workspace.dependencies]
-qpmu-api = { path = "../qpmu/qpmu-api" }
+qpmu-plugin = { path = "../qpmu/qpmu-plugin" }
 
 [profile.release]
 codegen-units = 1

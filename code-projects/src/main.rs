@@ -1,7 +1,7 @@
 use std::{path::PathBuf, sync::LazyLock};
 
 use anyhow::{Context, Result};
-use qpmu_api::*;
+use qpmu_plugin::*;
 use serde::Deserialize;
 use tokio::fs;
 
@@ -52,5 +52,5 @@ impl Plugin for CodeProjects {
 }
 
 fn main() {
-    qpmu_api::main::<CodeProjects>();
+    qpmu_plugin::main::<CodeProjects>();
 }

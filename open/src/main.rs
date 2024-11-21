@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::Result;
-use qpmu_api::*;
+use qpmu_plugin::*;
 use serde::Deserialize;
 
 struct Open {
@@ -86,5 +86,5 @@ impl Plugin for Open {
 }
 
 fn main() {
-    qpmu_api::main::<Open>()
+    qpmu_plugin::main::<Open>()
 }

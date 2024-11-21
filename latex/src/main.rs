@@ -1,5 +1,5 @@
 use anyhow::Result;
-use qpmu_api::*;
+use qpmu_plugin::*;
 
 // mapping from
 // https://github.com/joom/latex-unicoder.vim/blob/master/autoload/unicoder.vim
@@ -53,5 +53,5 @@ impl Plugin for Latex {
 }
 
 fn main() {
-    qpmu_api::main::<Latex>();
+    qpmu_plugin::main::<Latex>();
 }

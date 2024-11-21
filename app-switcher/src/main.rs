@@ -2,7 +2,7 @@ use std::{process::Stdio, sync::LazyLock};
 
 use anyhow::{bail, Result};
 use freedesktop_desktop_entry::{self as desktop, DesktopEntry};
-use qpmu_api::*;
+use qpmu_plugin::*;
 
 struct AppSwitcher {
     entries: Vec<ListItem>,
@@ -123,5 +123,5 @@ static KDOTOOL_PATH: LazyLock<String> = LazyLock::new(|| {
 });
 
 fn main() {
-    qpmu_api::main::<AppSwitcher>()
+    qpmu_plugin::main::<AppSwitcher>()
 }

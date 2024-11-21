@@ -6,5 +6,5 @@ metadata.workspace = true
 
 [dependencies]
 freedesktop-desktop-entry = "0.7.5"
-qpmu-api.workspace = true
+qpmu-plugin.workspace = true
 tokio = { version = "1.41.1", features = ["fs", "process"] }

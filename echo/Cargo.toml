@@ -5,5 +5,5 @@ edition = "2021"
 metadata.workspace = true
 
 [dependencies]
-qpmu-api.workspace = true
+qpmu-plugin.workspace = true
 tokio = "1.41.1"
