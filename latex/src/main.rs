@@ -1,5 +1,4 @@
-use anyhow::Result;
-use qpmu_plugin::*;
+use qpmu_plugin::{rank, Action, ActivationContext, Input, ListItem, Plugin, Result};
 
 // mapping from
 // https://github.com/joom/latex-unicoder.vim/blob/master/autoload/unicoder.vim

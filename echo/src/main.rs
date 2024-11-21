@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use qpmu_plugin::{anyhow::Result, Action, ActivationContext, ListItem, Plugin};
+use qpmu_plugin::{Action, ActivationContext, ListItem, Plugin, Result};
 
 struct Echo;
 

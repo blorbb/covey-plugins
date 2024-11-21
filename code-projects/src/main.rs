@@ -1,7 +1,6 @@
 use std::{path::PathBuf, sync::LazyLock};
 
-use anyhow::{Context, Result};
-use qpmu_plugin::*;
+use qpmu_plugin::{anyhow::Context as _, rank, Action, ActivationContext, ListItem, Plugin, Result};
 use serde::Deserialize;
 use tokio::fs;
 

@@ -1,8 +1,7 @@
 use std::{process::Stdio, sync::LazyLock};
 
-use anyhow::{bail, Result};
 use freedesktop_desktop_entry::{self as desktop, DesktopEntry};
-use qpmu_plugin::*;
+use qpmu_plugin::{anyhow::bail, rank, Action, ActivationContext, ListItem, Plugin, Result};
 
 struct AppSwitcher {
     entries: Vec<ListItem>,

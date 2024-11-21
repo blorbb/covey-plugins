@@ -1,7 +1,6 @@
 use std::process::Stdio;
 
-use anyhow::Result;
-use qpmu_plugin::*;
+use qpmu_plugin::{Action, ActivationContext, Input, ListItem, Plugin, Result};
 use tokio::process::Command;
 
 struct Qalc;

@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
-use anyhow::Result;
-use qpmu_plugin::*;
+use qpmu_plugin::{rank, Action, ActivationContext, Input, ListItem, Plugin, Result};
 use serde::Deserialize;
 
 struct Open {

@@ -1,7 +1,8 @@
 use std::process::Stdio;
 
-use anyhow::Context;
-use qpmu_plugin::{anyhow::Result, *};
+use qpmu_plugin::{
+    anyhow::Context, rank, Action, ActivationContext, Input, ListItem, Plugin, Result,
+};
 use tokio::{fs, process::Command};
 use tokio_stream::{wrappers::ReadDirStream, StreamExt};
 
