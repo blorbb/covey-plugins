@@ -1,6 +1,6 @@
 use std::process::Stdio;
 
-use qpmu_plugin::{Action, ActivationContext, Input, ListItem, Plugin, Result};
+use qpmu_plugin::{Action, ActivationContext, Input, List, ListItem, Plugin, Result};
 use tokio::process::Command;
 
 struct Qalc;
@@ -23,7 +23,7 @@ impl Plugin for Qalc {
         Ok(Self)
     }
 
-    async fn query(&self, query: String) -> Result<Vec<ListItem>> {
+    async fn query(&self, query: String) -> Result<List> {
         let output = Command::new("qalc")
             .arg(&query)
             .stdin(Stdio::null())
@@ -36,7 +36,7 @@ impl Plugin for Qalc {
         let item = ListItem::new(line)
             .with_metadata(query)
             .with_icon(Some("qalculate"));
-        Ok(vec![item])
+        Ok(List::new(vec![item]))
     }
 
     async fn activate(

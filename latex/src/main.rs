@@ -1,4 +1,4 @@
-use qpmu_plugin::{rank, Action, ActivationContext, Input, ListItem, Plugin, Result};
+use qpmu_plugin::{rank, Action, ActivationContext, Input, List, ListItem, Plugin, Result};
 
 // mapping from
 // https://github.com/joom/latex-unicoder.vim/blob/master/autoload/unicoder.vim
@@ -22,8 +22,8 @@ impl Plugin for Latex {
         Ok(Latex { info })
     }
 
-    async fn query(&self, query: String) -> Result<Vec<ListItem>> {
-        let ranking = rank::rank(
+    async fn query(&self, query: String) -> Result<List> {
+        let ranking: Vec<_> = rank::rank(
             &query,
             &self.info,
             rank::Weights::with_history().title(0.0).description(1.0),
@@ -33,7 +33,7 @@ impl Plugin for Latex {
         .take(100)
         .collect();
 
-        Ok(ranking)
+        Ok(List::new(ranking))
     }
 
     async fn activate(

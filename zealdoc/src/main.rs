@@ -1,7 +1,7 @@
 use std::process::Stdio;
 
 use qpmu_plugin::{
-    anyhow::Context, rank, Action, ActivationContext, Input, ListItem, Plugin, Result,
+    anyhow::Context, rank, Action, ActivationContext, Input, List, ListItem, Plugin, Result,
 };
 use tokio::{fs, process::Command};
 use tokio_stream::{wrappers::ReadDirStream, StreamExt};
@@ -41,7 +41,7 @@ impl Plugin for Zealdoc {
         Ok(Self { docsets })
     }
 
-    async fn query(&self, query: String) -> Result<Vec<ListItem>> {
+    async fn query(&self, query: String) -> Result<List> {
         let lang_query = self.docsets.iter().find_map(|docset| {
             Some((
                 query.strip_prefix(&docset.lang)?.strip_prefix([' ', ':'])?,
@@ -59,14 +59,15 @@ impl Plugin for Zealdoc {
                 .wait_with_output()
                 .await?;
 
-            Ok(String::from_utf8(output.stdout)?
+            let items = String::from_utf8(output.stdout)?
                 .lines()
                 .map(|line| {
                     ListItem::new(line)
                         .with_metadata(&docset.lang)
                         .with_icon(Some("zeal"))
                 })
-                .collect())
+                .collect();
+            Ok(List::new(items))
         } else {
             // just search the prefixes
             let list_items: Vec<ListItem> = self
@@ -75,7 +76,9 @@ impl Plugin for Zealdoc {
                 .map(|docset| ListItem::new(&docset.lang).with_icon(Some("zeal")))
                 .collect();
 
-            Ok(rank::rank(&query, &list_items, rank::Weights::with_history()).await)
+            Ok(List::new(
+                rank::rank(&query, &list_items, rank::Weights::with_history()).await,
+            ))
         }
     }
 

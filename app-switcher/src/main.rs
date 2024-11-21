@@ -1,7 +1,7 @@
 use std::{process::Stdio, sync::LazyLock};
 
 use freedesktop_desktop_entry::{self as desktop, DesktopEntry};
-use qpmu_plugin::{anyhow::bail, rank, Action, ActivationContext, ListItem, Plugin, Result};
+use qpmu_plugin::{anyhow::bail, rank, Action, ActivationContext, List, ListItem, Plugin, Result};
 
 struct AppSwitcher {
     entries: Vec<ListItem>,
@@ -52,8 +52,10 @@ impl Plugin for AppSwitcher {
         Ok(Self { entries })
     }
 
-    async fn query(&self, query: String) -> Result<Vec<ListItem>> {
-        Ok(rank::rank(&query, &self.entries, rank::Weights::with_history()).await)
+    async fn query(&self, query: String) -> Result<List> {
+        Ok(List::new(
+            rank::rank(&query, &self.entries, rank::Weights::with_history()).await,
+        ))
     }
 
     async fn activate(

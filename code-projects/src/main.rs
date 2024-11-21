@@ -1,6 +1,8 @@
 use std::{path::PathBuf, sync::LazyLock};
 
-use qpmu_plugin::{anyhow::Context as _, rank, Action, ActivationContext, ListItem, Plugin, Result};
+use qpmu_plugin::{
+    anyhow::Context as _, rank, Action, ActivationContext, List, ListItem, Plugin, Result,
+};
 use serde::Deserialize;
 use tokio::fs;
 
@@ -23,7 +25,7 @@ impl Plugin for CodeProjects {
         Ok(Self)
     }
 
-    async fn query(&self, query: String) -> Result<Vec<ListItem>> {
+    async fn query(&self, query: String) -> Result<List> {
         let path = fs::read(&*PROJECTS_PATH)
             .await
             .context("could not open project-manager projects data")?;
@@ -35,7 +37,9 @@ impl Plugin for CodeProjects {
             .map(|value| ListItem::new(value.name).with_description(value.root_path))
             .collect::<Vec<_>>();
 
-        Ok(rank::rank(&query, &list, rank::Weights::with_history()).await)
+        Ok(List::new(
+            rank::rank(&query, &list, rank::Weights::with_history()).await,
+        ))
     }
 
     async fn activate(

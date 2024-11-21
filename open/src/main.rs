@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use qpmu_plugin::{rank, Action, ActivationContext, Input, ListItem, Plugin, Result};
+use qpmu_plugin::{rank, Action, ActivationContext, Input, List, ListItem, Plugin, Result};
 use serde::Deserialize;
 
 struct Open {
@@ -21,7 +21,7 @@ impl Plugin for Open {
         })
     }
 
-    async fn query(&self, query: String) -> Result<Vec<ListItem>> {
+    async fn query(&self, query: String) -> Result<List> {
         if let Some((new_query, target)) = self.urls.iter().find_map(|(prefix, target)| {
             query
                 .strip_prefix(prefix)
@@ -32,7 +32,7 @@ impl Plugin for Open {
             let search = ListItem::new(format!("Search {} for {}", target.name, new_query))
                 .with_description(target.url.replace("%s", new_query));
 
-            Ok(vec![search])
+            Ok(List::new(vec![search]))
         } else {
             // query doesn't match any prefix in the list: rank them
             let items = self
@@ -47,7 +47,7 @@ impl Plugin for Open {
                 .collect::<Vec<_>>();
 
             let ranking = rank::rank(&query, &items, rank::Weights::with_history()).await;
-            Ok(ranking)
+            Ok(List::new(ranking))
         }
     }
 
