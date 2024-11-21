@@ -6,10 +6,11 @@ use tokio::process::Command;
 
 struct Qalc;
 
-async fn get_terse_qalc_output(query: &str) -> Result<String> {
+async fn get_qalc_output(query: &str, extra_args: &[&str]) -> Result<String> {
     let output = Command::new("qalc")
-        .arg("-t")
+        .args(extra_args)
         .arg(query)
+        .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .spawn()?
         .wait_with_output()
@@ -45,7 +46,18 @@ impl Plugin for Qalc {
     ) -> Result<Vec<Action>> {
         Ok(vec![
             Action::Close,
-            Action::Copy(get_terse_qalc_output(&item.metadata).await?),
+            Action::Copy(get_qalc_output(&item.metadata, &["-t"]).await?),
+        ])
+    }
+
+    async fn alt_activate(
+        &self,
+        ActivationContext { item, .. }: ActivationContext,
+    ) -> Result<Vec<Action>> {
+        // copy the entire output string, not just the final expression
+        Ok(vec![
+            Action::Close,
+            Action::Copy(get_qalc_output(&item.metadata, &[]).await?),
         ])
     }
 
@@ -54,7 +66,7 @@ impl Plugin for Qalc {
         ActivationContext { item, .. }: ActivationContext,
     ) -> Result<Option<Input>> {
         Ok(Some(Input::new(
-            get_terse_qalc_output(&item.metadata).await?,
+            get_qalc_output(&item.metadata, &["-t"]).await?,
         )))
     }
 }
