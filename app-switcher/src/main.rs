@@ -57,8 +57,11 @@ impl Plugin for AppSwitcher {
         Ok(rank::rank(&query, &self.entries, rank::Weights::with_history()).await)
     }
 
-    async fn activate(&self, selected: ListItem) -> Result<Vec<Action>> {
-        let (exec_cmd, class) = selected.metadata.split_once('\n').unwrap();
+    async fn activate(
+        &self,
+        ActivationContext { item, .. }: ActivationContext,
+    ) -> Result<Vec<Action>> {
+        let (exec_cmd, class) = item.metadata.split_once('\n').unwrap();
 
         if !class.is_empty() {
             // try and activate it with kdotool

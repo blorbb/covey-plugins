@@ -39,11 +39,14 @@ impl Plugin for CodeProjects {
         Ok(rank::rank(&query, &list, rank::Weights::with_history()).await)
     }
 
-    async fn activate(&self, selected: ListItem) -> Result<Vec<Action>> {
+    async fn activate(
+        &self,
+        ActivationContext { item, .. }: ActivationContext,
+    ) -> Result<Vec<Action>> {
         // https://github.com/brpaz/ulauncher-vscode-projects/blob/master/vscode_projects/listeners/item_enter.py
         Ok(vec![
             Action::Close,
-            Action::RunCommand("code".to_string(), vec![selected.description]),
+            Action::RunCommand("code".to_string(), vec![item.description]),
         ])
     }
 }

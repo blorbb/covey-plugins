@@ -39,16 +39,22 @@ impl Plugin for Qalc {
         Ok(vec![item])
     }
 
-    async fn activate(&self, item: ListItem) -> Result<Vec<Action>> {
+    async fn activate(
+        &self,
+        ActivationContext { item, .. }: ActivationContext,
+    ) -> Result<Vec<Action>> {
         Ok(vec![
             Action::Close,
             Action::Copy(get_terse_qalc_output(&item.metadata).await?),
         ])
     }
 
-    async fn complete(&self, _query: String, selected: ListItem) -> Result<Option<Input>> {
+    async fn complete(
+        &self,
+        ActivationContext { item, .. }: ActivationContext,
+    ) -> Result<Option<Input>> {
         Ok(Some(Input::new(
-            get_terse_qalc_output(&selected.metadata).await?,
+            get_terse_qalc_output(&item.metadata).await?,
         )))
     }
 }

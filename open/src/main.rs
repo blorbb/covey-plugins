@@ -52,33 +52,33 @@ impl Plugin for Open {
         }
     }
 
-    async fn activate(&self, selected: ListItem) -> Result<Vec<Action>> {
-        if !selected.metadata.is_empty() {
+    async fn activate(&self, cx: ActivationContext) -> Result<Vec<Action>> {
+        if !cx.item.metadata.is_empty() {
             let input = self
-                .complete(String::new(), selected)
+                .complete(cx)
                 .await?
                 .expect("complete should return string as metadata is non empty");
             return Ok(vec![Action::SetInput(input)]);
         }
 
         // actually go to the url
-        let url = selected.description;
+        let url = cx.item.description;
         Ok(vec![
             Action::Close,
             Action::RunCommand("xdg-open".to_owned(), vec![url]),
         ])
     }
 
-    async fn complete(&self, _: String, selected: ListItem) -> Result<Option<Input>> {
+    async fn complete(
+        &self,
+        ActivationContext { item, .. }: ActivationContext,
+    ) -> Result<Option<Input>> {
         // if it has metadata, still typing the prefix.
         // complete the prefix selected.
-        if selected.metadata.is_empty() {
+        if item.metadata.is_empty() {
             return Ok(None);
         };
-        let index: usize = selected
-            .metadata
-            .parse()
-            .expect("metadata should be an int");
+        let index: usize = item.metadata.parse().expect("metadata should be an int");
 
         let prefix = &self.urls[index].0;
         Ok(Some(Input::new(format!("{prefix} "))))

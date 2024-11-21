@@ -27,9 +27,7 @@ impl Plugin for Latex {
         let ranking = rank::rank(
             &query,
             &self.info,
-            rank::Weights::with_history()
-                .title(0.0)
-                .description(1.0),
+            rank::Weights::with_history().title(0.0).description(1.0),
         )
         .await
         .into_iter()
@@ -39,12 +37,18 @@ impl Plugin for Latex {
         Ok(ranking)
     }
 
-    async fn activate(&self, selected: ListItem) -> Result<Vec<Action>> {
-        Ok(vec![Action::Close, Action::Copy(selected.title)])
+    async fn activate(
+        &self,
+        ActivationContext { item, .. }: ActivationContext,
+    ) -> Result<Vec<Action>> {
+        Ok(vec![Action::Close, Action::Copy(item.title)])
     }
 
-    async fn complete(&self, _: String, selected: ListItem) -> Result<Option<Input>> {
-        Ok(Some(Input::new(selected.description)))
+    async fn complete(
+        &self,
+        ActivationContext { item, .. }: ActivationContext,
+    ) -> Result<Option<Input>> {
+        Ok(Some(Input::new(item.description)))
     }
 }
 
