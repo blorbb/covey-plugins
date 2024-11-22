@@ -64,7 +64,7 @@ impl Plugin for Zealdoc {
                 .map(|line| {
                     ListItem::new(line)
                         .with_metadata(&docset.lang)
-                        .with_icon(Some("zeal"))
+                        .with_icon_name("zeal")
                 })
                 .collect();
             Ok(List::new(items))
@@ -73,7 +73,7 @@ impl Plugin for Zealdoc {
             let list_items: Vec<ListItem> = self
                 .docsets
                 .iter()
-                .map(|docset| ListItem::new(&docset.lang).with_icon(Some("zeal")))
+                .map(|docset| ListItem::new(&docset.lang).with_icon_name("zeal"))
                 .collect();
 
             Ok(List::new(

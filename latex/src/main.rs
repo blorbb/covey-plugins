@@ -16,24 +16,20 @@ impl Plugin for Latex {
                 line.split_once(',')
                     .unwrap_or_else(|| panic!("failed to split line {line}"))
             })
-            .map(|(latex, unicode)| ListItem::new(unicode).with_description(latex))
+            .map(|(latex, unicode)| ListItem::new(latex).with_icon_text(unicode))
             .collect();
 
         Ok(Latex { info })
     }
 
     async fn query(&self, query: String) -> Result<List> {
-        let ranking: Vec<_> = rank::rank(
-            &query,
-            &self.info,
-            rank::Weights::with_history().title(0.0).description(1.0),
-        )
-        .await
-        .into_iter()
-        .take(100)
-        .collect();
+        let ranking: Vec<_> = rank::rank(&query, &self.info, rank::Weights::with_history())
+            .await
+            .into_iter()
+            .take(100)
+            .collect();
 
-        Ok(List::new(ranking))
+        Ok(List::new(ranking).as_grid())
     }
 
     async fn activate(

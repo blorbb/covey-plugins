@@ -35,7 +35,7 @@ impl Plugin for Qalc {
         let line = String::from_utf8(output.stdout)?.trim().to_string();
         let item = ListItem::new(line)
             .with_metadata(query)
-            .with_icon(Some("qalculate"));
+            .with_icon_name("qalculate");
         Ok(List::new(vec![item]))
     }
 

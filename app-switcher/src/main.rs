@@ -1,7 +1,9 @@
 use std::{process::Stdio, sync::LazyLock};
 
 use freedesktop_desktop_entry::{self as desktop, DesktopEntry};
-use qpmu_plugin::{anyhow::bail, rank, Action, ActivationContext, List, ListItem, Plugin, Result};
+use qpmu_plugin::{
+    anyhow::bail, rank, Action, ActivationContext, Icon, List, ListItem, Plugin, Result,
+};
 
 struct AppSwitcher {
     entries: Vec<ListItem>,
@@ -37,7 +39,7 @@ fn process_entry(entry: DesktopEntry<'_>, locales: &[impl AsRef<str>]) -> Option
         ListItem::new(entry.name(locales)?)
             .with_description(entry.comment(locales).unwrap_or_default())
             .with_metadata(metadata)
-            .with_icon(entry.icon()),
+            .with_icon(entry.icon().map(|name| Icon::Name(name.to_string()))),
     )
 }
 
