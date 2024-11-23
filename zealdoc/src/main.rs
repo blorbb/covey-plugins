@@ -90,13 +90,14 @@ impl Plugin for Zealdoc {
                         .on_activate(clone_async!(
                             #[double]
                             lang = docset.lang,
-                            q = stripped_query.to_string(),
+                            #[double]
+                            stripped_query,
                             || {
                                 Ok(vec![
                                     Action::Close,
                                     Action::RunCommand(
                                         "zeal".to_string(),
-                                        vec![format!("{lang}:{q}")],
+                                        vec![format!("{lang}:{stripped_query}")],
                                     ),
                                 ])
                             }
@@ -104,7 +105,8 @@ impl Plugin for Zealdoc {
                         .on_complete(clone_async!(
                             #[double]
                             lang = docset.lang,
-                            line = line.to_string(),
+                            #[double]
+                            line,
                             || Ok(Some(Input::new(format!("{lang}:{line}"))))
                         ))
                 })

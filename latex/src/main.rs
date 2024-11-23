@@ -1,4 +1,4 @@
-use qpmu_plugin::{rank, Action, Input, List, ListItem, Plugin, Result};
+use qpmu_plugin::{clone_async, rank, Action, Input, List, ListItem, Plugin, Result};
 
 // mapping from
 // https://github.com/joom/latex-unicoder.vim/blob/master/autoload/unicoder.vim
@@ -19,10 +19,10 @@ impl Plugin for Latex {
             .map(|(latex, unicode)| {
                 ListItem::new(latex)
                     .with_icon_text(unicode)
-                    .on_activate(move || async move {
-                        Ok(vec![Action::Close, Action::Copy(latex.to_string())])
-                    })
-                    .on_complete(move || async move { Ok(Some(Input::new(unicode))) })
+                    .on_activate(clone_async!(latex, || {
+                        Ok(vec![Action::Close, Action::Copy(latex)])
+                    }))
+                    .on_complete(clone_async!(|| Ok(Some(Input::new(unicode)))))
             })
             .collect();
 
