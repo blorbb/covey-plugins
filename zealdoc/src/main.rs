@@ -1,7 +1,7 @@
 use std::process::Stdio;
 
 use qpmu_plugin::{
-    anyhow::Context, rank, Action, ActivationContext, Input, List, ListItem, Plugin, Result,
+    anyhow::Context, clone_async, rank, Action, Input, List, ListItem, Plugin, Result,
 };
 use tokio::{fs, process::Command};
 use tokio_stream::{wrappers::ReadDirStream, StreamExt};
@@ -13,6 +13,8 @@ struct Docset {
 
 struct Zealdoc {
     docsets: Vec<Docset>,
+    // what to show if the query doesn't match one of the languages yet
+    prefix_prompt: Vec<ListItem>,
 }
 
 impl Plugin for Zealdoc {
@@ -22,7 +24,7 @@ impl Plugin for Zealdoc {
             .join("Zeal/Zeal/docsets/");
         let docsets = fs::read_dir(docsets_path).await?;
 
-        let docsets = ReadDirStream::new(docsets)
+        let docsets: Vec<_> = ReadDirStream::new(docsets)
             .filter_map(Result::ok)
             .map(|entry| entry.path())
             .filter(|path| path.extension().is_some_and(|ext| ext == "docset"))
@@ -38,7 +40,28 @@ impl Plugin for Zealdoc {
             .collect()
             .await;
 
-        Ok(Self { docsets })
+        let prefix_prompt = docsets
+            .iter()
+            .map(|docset| {
+                ListItem::new(&docset.lang)
+                    .with_icon_name("zeal")
+                    .on_activate(clone_async!(
+                        #[double]
+                        lang = docset.lang,
+                        || Ok(vec![Action::SetInput(Input::new(format!("{lang}:")))])
+                    ))
+                    .on_complete(clone_async!(
+                        #[double]
+                        lang = docset.lang,
+                        || Ok(Some(Input::new(format!("{lang}:"))))
+                    ))
+            })
+            .collect();
+
+        Ok(Self {
+            docsets,
+            prefix_prompt,
+        })
     }
 
     async fn query(&self, query: String) -> Result<List> {
@@ -63,55 +86,35 @@ impl Plugin for Zealdoc {
                 .lines()
                 .map(|line| {
                     ListItem::new(line)
-                        .with_metadata(&docset.lang)
                         .with_icon_name("zeal")
+                        .on_activate(clone_async!(
+                            #[double]
+                            lang = docset.lang,
+                            q = stripped_query.to_string(),
+                            || {
+                                Ok(vec![
+                                    Action::Close,
+                                    Action::RunCommand(
+                                        "zeal".to_string(),
+                                        vec![format!("{lang}:{q}")],
+                                    ),
+                                ])
+                            }
+                        ))
+                        .on_complete(clone_async!(
+                            #[double]
+                            lang = docset.lang,
+                            line = line.to_string(),
+                            || Ok(Some(Input::new(format!("{lang}:{line}"))))
+                        ))
                 })
                 .collect();
             Ok(List::new(items))
         } else {
             // just search the prefixes
-            let list_items: Vec<ListItem> = self
-                .docsets
-                .iter()
-                .map(|docset| ListItem::new(&docset.lang).with_icon_name("zeal"))
-                .collect();
-
             Ok(List::new(
-                rank::rank(&query, &list_items, rank::Weights::with_history()).await,
+                rank::rank(&query, &self.prefix_prompt, rank::Weights::with_history()).await,
             ))
-        }
-    }
-
-    async fn activate(&self, cx: ActivationContext) -> Result<Vec<Action>> {
-        if cx.item.metadata.is_empty() {
-            return Ok(vec![Action::SetInput(
-                self.complete(cx).await?.expect("complete always completes"),
-            )]);
-        }
-
-        let item = cx.item;
-        let lang = item.metadata;
-        let query = item.title;
-
-        Ok(vec![
-            Action::Close,
-            Action::RunCommand("zeal".to_string(), vec![format!("{lang}:{query}")]),
-        ])
-    }
-
-    async fn complete(
-        &self,
-        ActivationContext { item, .. }: ActivationContext,
-    ) -> Result<Option<Input>> {
-        if item.metadata.is_empty() {
-            // no language selected yet, autocomplete the language
-            Ok(Some(Input::new(format!("{}:", item.title))))
-        } else {
-            // language selected, complete the language and query
-            Ok(Some(Input::new(format!(
-                "{}:{}",
-                item.metadata, item.title
-            ))))
         }
     }
 }

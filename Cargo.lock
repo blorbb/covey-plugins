@@ -1579,6 +1579,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "az",
+ "parking_lot",
  "prost",
  "sqlx",
  "sublime_fuzzy",

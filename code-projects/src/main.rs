@@ -1,7 +1,7 @@
 use std::{path::PathBuf, sync::LazyLock};
 
 use qpmu_plugin::{
-    anyhow::Context as _, rank, Action, ActivationContext, List, ListItem, Plugin, Result,
+    anyhow::Context as _, clone_async, rank, Action, List, ListItem, Plugin, Result,
 };
 use serde::Deserialize;
 use tokio::fs;
@@ -34,23 +34,22 @@ impl Plugin for CodeProjects {
 
         let list = value
             .into_iter()
-            .map(|value| ListItem::new(value.name).with_description(value.root_path))
+            .map(|value| {
+                ListItem::new(value.name)
+                    .with_description(value.root_path.clone())
+                    .on_activate(clone_async!(path = value.root_path, || {
+                        // https://github.com/brpaz/ulauncher-vscode-projects/blob/master/vscode_projects/listeners/item_enter.py
+                        Ok(vec![
+                            Action::Close,
+                            Action::RunCommand("code".to_string(), vec![path]),
+                        ])
+                    }))
+            })
             .collect::<Vec<_>>();
 
         Ok(List::new(
             rank::rank(&query, &list, rank::Weights::with_history()).await,
         ))
-    }
-
-    async fn activate(
-        &self,
-        ActivationContext { item, .. }: ActivationContext,
-    ) -> Result<Vec<Action>> {
-        // https://github.com/brpaz/ulauncher-vscode-projects/blob/master/vscode_projects/listeners/item_enter.py
-        Ok(vec![
-            Action::Close,
-            Action::RunCommand("code".to_string(), vec![item.description]),
-        ])
     }
 }
 

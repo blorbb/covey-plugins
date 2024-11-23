@@ -1,9 +1,7 @@
 use std::{process::Stdio, sync::LazyLock};
 
 use freedesktop_desktop_entry::{self as desktop, DesktopEntry};
-use qpmu_plugin::{
-    anyhow::bail, rank, Action, ActivationContext, Icon, List, ListItem, Plugin, Result,
-};
+use qpmu_plugin::{anyhow::bail, clone_async, rank, Action, Icon, List, ListItem, Plugin, Result};
 
 struct AppSwitcher {
     entries: Vec<ListItem>,
@@ -29,17 +27,21 @@ fn process_entry(entry: DesktopEntry<'_>, locales: &[impl AsRef<str>]) -> Option
     // lots of allocations but its a tiny string anyways, doesn't matter
     let exec = entry.parse_exec().ok()?.join(" ");
 
-    let metadata = format!(
-        "{}\n{}",
-        exec,
-        entry.startup_wm_class().unwrap_or(entry.id())
-    );
+    let class = entry.startup_wm_class().unwrap_or(entry.id()).to_string();
 
     Some(
         ListItem::new(entry.name(locales)?)
             .with_description(entry.comment(locales).unwrap_or_default())
-            .with_metadata(metadata)
-            .with_icon(entry.icon().map(|name| Icon::Name(name.to_string()))),
+            .with_icon(entry.icon().map(|name| Icon::Name(name.to_string())))
+            .on_activate(clone_async!(class, exec, || {
+                if !class.is_empty() {
+                    if activate_kdotool(&class).await.is_ok() {
+                        return Ok(vec![Action::Close]);
+                    }
+                }
+
+                Ok(vec![Action::Close, Action::RunShell(exec)])
+            })),
     )
 }
 
@@ -58,22 +60,6 @@ impl Plugin for AppSwitcher {
         Ok(List::new(
             rank::rank(&query, &self.entries, rank::Weights::with_history()).await,
         ))
-    }
-
-    async fn activate(
-        &self,
-        ActivationContext { item, .. }: ActivationContext,
-    ) -> Result<Vec<Action>> {
-        let (exec_cmd, class) = item.metadata.split_once('\n').unwrap();
-
-        if !class.is_empty() {
-            // try and activate it with kdotool
-            if activate_kdotool(class).await.is_ok() {
-                return Ok(vec![Action::Close]);
-            }
-        }
-
-        Ok(vec![Action::Close, Action::RunShell(exec_cmd.to_string())])
     }
 }
 

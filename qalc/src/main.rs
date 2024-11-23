@@ -1,6 +1,6 @@
 use std::process::Stdio;
 
-use qpmu_plugin::{Action, ActivationContext, Input, List, ListItem, Plugin, Result};
+use qpmu_plugin::{clone_async, Action, Input, List, ListItem, Plugin, Result};
 use tokio::process::Command;
 
 struct Qalc;
@@ -24,49 +24,21 @@ impl Plugin for Qalc {
     }
 
     async fn query(&self, query: String) -> Result<List> {
-        let output = Command::new("qalc")
-            .arg(&query)
-            .stdin(Stdio::null())
-            .stdout(Stdio::piped())
-            .spawn()?
-            .wait_with_output()
-            .await?;
+        let line = get_qalc_output(&query, &[]).await?;
+        let terse = get_qalc_output(&query, &["-t"]).await?;
 
-        let line = String::from_utf8(output.stdout)?.trim().to_string();
-        let item = ListItem::new(line)
-            .with_metadata(query)
-            .with_icon_name("qalculate");
+        let item = ListItem::new(line.clone())
+            .with_icon_name("qalculate")
+            .on_activate(clone_async!(
+                #[double]
+                terse,
+                || Ok(vec![Action::Close, Action::Copy(terse)])
+            ))
+            .on_alt_activate(clone_async!(line, || {
+                Ok(vec![Action::Close, Action::Copy(line)])
+            }))
+            .on_complete(clone_async!(terse, || Ok(Some(Input::new(terse)))));
         Ok(List::new(vec![item]))
-    }
-
-    async fn activate(
-        &self,
-        ActivationContext { item, .. }: ActivationContext,
-    ) -> Result<Vec<Action>> {
-        Ok(vec![
-            Action::Close,
-            Action::Copy(get_qalc_output(&item.metadata, &["-t"]).await?),
-        ])
-    }
-
-    async fn alt_activate(
-        &self,
-        ActivationContext { item, .. }: ActivationContext,
-    ) -> Result<Vec<Action>> {
-        // copy the entire output string, not just the final expression
-        Ok(vec![
-            Action::Close,
-            Action::Copy(get_qalc_output(&item.metadata, &[]).await?),
-        ])
-    }
-
-    async fn complete(
-        &self,
-        ActivationContext { item, .. }: ActivationContext,
-    ) -> Result<Option<Input>> {
-        Ok(Some(Input::new(
-            get_qalc_output(&item.metadata, &["-t"]).await?,
-        )))
     }
 }
 

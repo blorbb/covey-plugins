@@ -1,4 +1,4 @@
-use qpmu_plugin::{rank, Action, ActivationContext, Input, List, ListItem, Plugin, Result};
+use qpmu_plugin::{rank, Action, Input, List, ListItem, Plugin, Result};
 
 // mapping from
 // https://github.com/joom/latex-unicoder.vim/blob/master/autoload/unicoder.vim
@@ -16,7 +16,14 @@ impl Plugin for Latex {
                 line.split_once(',')
                     .unwrap_or_else(|| panic!("failed to split line {line}"))
             })
-            .map(|(latex, unicode)| ListItem::new(latex).with_icon_text(unicode))
+            .map(|(latex, unicode)| {
+                ListItem::new(latex)
+                    .with_icon_text(unicode)
+                    .on_activate(move || async move {
+                        Ok(vec![Action::Close, Action::Copy(latex.to_string())])
+                    })
+                    .on_complete(move || async move { Ok(Some(Input::new(unicode))) })
+            })
             .collect();
 
         Ok(Latex { info })
@@ -30,20 +37,6 @@ impl Plugin for Latex {
             .collect();
 
         Ok(List::new(ranking).as_grid())
-    }
-
-    async fn activate(
-        &self,
-        ActivationContext { item, .. }: ActivationContext,
-    ) -> Result<Vec<Action>> {
-        Ok(vec![Action::Close, Action::Copy(item.title)])
-    }
-
-    async fn complete(
-        &self,
-        ActivationContext { item, .. }: ActivationContext,
-    ) -> Result<Option<Input>> {
-        Ok(Some(Input::new(item.description)))
     }
 }
 
