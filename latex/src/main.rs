@@ -19,8 +19,8 @@ impl Plugin for Latex {
             .map(|(latex, unicode)| {
                 ListItem::new(latex)
                     .with_icon_text(unicode)
-                    .on_activate(clone_async!(latex, || {
-                        Ok(vec![Action::Close, Action::Copy(latex)])
+                    .on_activate(clone_async!(unicode, || {
+                        Ok(vec![Action::Close, Action::Copy(unicode)])
                     }))
                     .on_complete(clone_async!(|| Ok(Some(Input::new(unicode)))))
             })
