@@ -9,7 +9,7 @@ Opens URLs.
 name = "open"
 prefix = "@"
 
-[plugins.options]
+[plugins.config.urls]
 cr = { name = "crates docs", url = "https://docs.rs/%s" }
 std = { name = "Rust stdlib", url = "https://doc.rust-lang.org/std/?search=%s" }
 g = { name = "Google", url = "https://www.google.com/search?q=%s" }
