@@ -1,0 +1,4 @@
+name = "LaTeX"
+description = "Search and copy unicode symbols for LaTeX"
+repository = "https://github.com/blorbb/qpmu-plugins"
+authors = ["blorbb"]

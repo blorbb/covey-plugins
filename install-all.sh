@@ -11,5 +11,6 @@ for directory in */ ; do
         else
             (cd "$directory" && cargo build --release --artifact-dir ~/.local/share/qpmu/plugins/$directory -Z unstable-options)
         fi
+        cp "$directory/manifest.toml" ~/.local/share/qpmu/plugins/$directory/manifest.toml
     fi
 done
