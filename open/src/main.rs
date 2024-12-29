@@ -1,24 +1,20 @@
-use std::collections::HashMap;
-
 use qpmu_plugin::{clone_async, rank, Action, Input, List, ListItem, Plugin, Result};
-use serde::Deserialize;
+
+mod config {
+    qpmu_plugin::generate_config!();
+}
 
 struct Open {
-    urls: Vec<(String, OpenTarget)>,
+    urls: Vec<(String, config::urls::Urls)>,
     // list items to show when the prompt does not match any of the url prefixes
     prefix_prompt: Vec<ListItem>,
 }
 
-#[derive(Debug, Deserialize)]
-struct OpenTarget {
-    name: String,
-    url: String,
-}
-
 impl Plugin for Open {
     async fn new(config: String) -> Result<Self> {
-        let urls: HashMap<String, OpenTarget> = toml::from_str(&config)?;
-        let prefix_prompt = urls
+        let config: config::Config = toml::from_str(&config)?;
+        let prefix_prompt = config
+            .urls
             .iter()
             .map(|(prefix, target)| {
                 ListItem::new(format!("{prefix}: {}", target.name))
@@ -38,7 +34,7 @@ impl Plugin for Open {
             .collect::<Vec<_>>();
 
         Ok(Self {
-            urls: urls.into_iter().collect(),
+            urls: config.urls.into_iter().collect(),
             prefix_prompt,
         })
     }
