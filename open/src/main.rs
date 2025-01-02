@@ -5,7 +5,7 @@ mod config {
 }
 
 struct Open {
-    urls: Vec<(String, config::urls::Urls)>,
+    urls: Vec<(String, config::urls::UrlsValue)>,
     // list items to show when the prompt does not match any of the url prefixes
     prefix_prompt: Vec<ListItem>,
 }
