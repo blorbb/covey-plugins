@@ -18,7 +18,8 @@ struct Zealdoc {
 }
 
 impl Plugin for Zealdoc {
-    async fn new(_: String) -> Result<Self> {
+    type Config = ();
+    async fn new(_: ()) -> Result<Self> {
         let docsets_path = dirs::data_dir()
             .context("missing data directory")?
             .join("Zeal/Zeal/docsets/");

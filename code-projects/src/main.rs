@@ -21,7 +21,9 @@ struct Data {
 struct CodeProjects;
 
 impl Plugin for CodeProjects {
-    async fn new(_: String) -> Result<Self> {
+    type Config = ();
+
+    async fn new(_: ()) -> Result<Self> {
         Ok(Self)
     }
 

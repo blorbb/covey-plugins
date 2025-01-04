@@ -9,7 +9,9 @@ struct Latex {
 }
 
 impl Plugin for Latex {
-    async fn new(_: String) -> Result<Self> {
+    type Config = ();
+
+    async fn new(_: ()) -> Result<Self> {
         let info: Vec<_> = include_str!("../mapping.csv")
             .lines()
             .map(|line| {

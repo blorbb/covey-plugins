@@ -46,7 +46,9 @@ fn process_entry(entry: DesktopEntry<'_>, locales: &[impl AsRef<str>]) -> Option
 }
 
 impl Plugin for AppSwitcher {
-    async fn new(_: String) -> Result<Self> {
+    type Config = ();
+
+    async fn new(_: ()) -> Result<Self> {
         let locales = desktop::get_languages_from_env();
         let mut entries = Vec::new();
         for entry in desktop::Iter::new(desktop::default_paths()).entries(Some(&locales)) {

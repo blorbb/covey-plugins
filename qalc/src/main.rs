@@ -19,7 +19,9 @@ async fn get_qalc_output(query: &str, extra_args: &[&str]) -> Result<String> {
 }
 
 impl Plugin for Qalc {
-    async fn new(_: String) -> Result<Self> {
+    type Config = ();
+
+    async fn new(_: ()) -> Result<Self> {
         Ok(Self)
     }
 

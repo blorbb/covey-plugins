@@ -11,8 +11,9 @@ struct Open {
 }
 
 impl Plugin for Open {
-    async fn new(config: String) -> Result<Self> {
-        let config: config::Config = toml::from_str(&config)?;
+    type Config = config::Config;
+
+    async fn new(config: Self::Config) -> Result<Self> {
         let prefix_prompt = config
             .urls
             .iter()

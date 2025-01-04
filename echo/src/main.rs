@@ -5,7 +5,9 @@ use qpmu_plugin::{List, ListItem, Plugin, Result};
 struct Echo;
 
 impl Plugin for Echo {
-    async fn new(_: String) -> Result<Self> {
+    type Config = ();
+
+    async fn new(_: ()) -> Result<Self> {
         Ok(Self)
     }
 
