@@ -1,6 +1,6 @@
 use std::{path::PathBuf, sync::LazyLock};
 
-use qpmu_plugin::{
+use comette_plugin::{
     anyhow::Context as _, clone_async, rank, Action, List, ListItem, Plugin, Result,
 };
 use serde::Deserialize;
@@ -56,5 +56,5 @@ impl Plugin for CodeProjects {
 }
 
 fn main() {
-    qpmu_plugin::main::<CodeProjects>();
+    comette_plugin::main::<CodeProjects>();
 }

@@ -1,7 +1,7 @@
-use qpmu_plugin::{clone_async, rank, Action, Input, List, ListItem, Plugin, Result};
+use comette_plugin::{clone_async, rank, Action, Input, List, ListItem, Plugin, Result};
 
 mod config {
-    qpmu_plugin::generate_config!();
+    comette_plugin::generate_config!();
 }
 
 struct Open {
@@ -73,5 +73,5 @@ impl Plugin for Open {
 }
 
 fn main() {
-    qpmu_plugin::main::<Open>()
+    comette_plugin::main::<Open>()
 }

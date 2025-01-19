@@ -1,4 +1,4 @@
-# qpmu Open plugin
+# comette Open plugin
 
 Opens URLs.
 

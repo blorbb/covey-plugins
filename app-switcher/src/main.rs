@@ -1,7 +1,7 @@
 use std::{process::Stdio, sync::LazyLock};
 
 use freedesktop_desktop_entry::{self as desktop, DesktopEntry};
-use qpmu_plugin::{anyhow::bail, clone_async, rank, Action, Icon, List, ListItem, Plugin, Result};
+use comette_plugin::{anyhow::bail, clone_async, rank, Action, Icon, List, ListItem, Plugin, Result};
 
 struct AppSwitcher {
     entries: Vec<ListItem>,
@@ -114,5 +114,5 @@ static KDOTOOL_PATH: LazyLock<String> = LazyLock::new(|| {
 });
 
 fn main() {
-    qpmu_plugin::main::<AppSwitcher>()
+    comette_plugin::main::<AppSwitcher>()
 }

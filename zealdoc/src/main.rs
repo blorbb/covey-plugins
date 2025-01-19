@@ -1,6 +1,6 @@
 use std::process::Stdio;
 
-use qpmu_plugin::{
+use comette_plugin::{
     anyhow::Context, clone_async, rank, Action, Input, List, ListItem, Plugin, Result,
 };
 use tokio::{fs, process::Command};
@@ -129,5 +129,5 @@ fn sql_query(query: &str) -> String {
 }
 
 fn main() {
-    qpmu_plugin::main::<Zealdoc>()
+    comette_plugin::main::<Zealdoc>()
 }

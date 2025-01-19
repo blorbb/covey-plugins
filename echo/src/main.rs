@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use qpmu_plugin::{List, ListItem, Plugin, Result};
+use comette_plugin::{List, ListItem, Plugin, Result};
 
 struct Echo;
 
@@ -18,5 +18,5 @@ impl Plugin for Echo {
 }
 
 fn main() {
-    qpmu_plugin::main::<Echo>()
+    comette_plugin::main::<Echo>()
 }

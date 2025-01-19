@@ -1,6 +1,6 @@
 name = "Open"
 description = "Open URLs with a query"
-repository = "https://github.com/blorbb/qpmu-plugins"
+repository = "https://github.com/blorbb/comette-plugins"
 authors = ["blorbb"]
 
 [schema.urls]
