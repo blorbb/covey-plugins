@@ -259,6 +259,7 @@ dependencies = [
 name = "comette-manifest"
 version = "0.1.0"
 dependencies = [
+ "indexmap 2.6.0",
  "proc-macro2",
  "quote",
  "serde",
@@ -1042,6 +1043,7 @@ checksum = "707907fe3c25f5424cce2cb7e1cbcafee6bdbe735ca90ef77c29e84591e5b9da"
 dependencies = [
  "equivalent",
  "hashbrown 0.15.1",
+ "serde",
 ]
 
 [[package]]
@@ -2399,6 +2401,7 @@ version = "0.8.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a1ed1f98e3fdc28d6d910e6737ae6ab1a93bf1985935a1193e68f93eeb68d24e"
 dependencies = [
+ "indexmap 2.6.0",
  "serde",
  "serde_spanned",
  "toml_datetime",
