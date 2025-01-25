@@ -1,4 +1,4 @@
-# comette Open plugin
+# covey Open plugin
 
 Opens URLs.
 

@@ -1,6 +1,6 @@
 use std::process::Stdio;
 
-use comette_plugin::{clone_async, Action, Input, List, ListItem, Plugin, Result};
+use covey_plugin::{clone_async, Action, Input, List, ListItem, Plugin, Result};
 use tokio::process::Command;
 
 struct Qalc;
@@ -45,5 +45,5 @@ impl Plugin for Qalc {
 }
 
 fn main() {
-    comette_plugin::main::<Qalc>()
+    covey_plugin::main::<Qalc>()
 }

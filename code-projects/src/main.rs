@@ -1,6 +1,6 @@
 use std::{path::PathBuf, sync::LazyLock};
 
-use comette_plugin::{
+use covey_plugin::{
     anyhow::Context as _, clone_async, rank, Action, List, ListItem, Plugin, Result,
 };
 use serde::Deserialize;
@@ -56,5 +56,5 @@ impl Plugin for CodeProjects {
 }
 
 fn main() {
-    comette_plugin::main::<CodeProjects>();
+    covey_plugin::main::<CodeProjects>();
 }

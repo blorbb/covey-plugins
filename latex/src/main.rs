@@ -1,4 +1,4 @@
-use comette_plugin::{clone_async, rank, Action, Input, List, ListItem, Plugin, Result};
+use covey_plugin::{clone_async, rank, Action, Input, List, ListItem, Plugin, Result};
 
 // mapping from
 // https://github.com/joom/latex-unicoder.vim/blob/master/autoload/unicoder.vim
@@ -43,5 +43,5 @@ impl Plugin for Latex {
 }
 
 fn main() {
-    comette_plugin::main::<Latex>();
+    covey_plugin::main::<Latex>();
 }

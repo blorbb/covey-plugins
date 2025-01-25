@@ -3,7 +3,7 @@ members = ["echo", "app-switcher", "qalc", "code-projects", "open", "zealdoc", "
 resolver = "2"
 
 [workspace.dependencies]
-comette-plugin = { path = "../comette/comette-plugin" }
+covey-plugin = { path = "../covey/covey-plugin" }
 
 [profile.release]
 codegen-units = 1

@@ -5,5 +5,5 @@ edition = "2021"
 metadata.workspace = true
 
 [dependencies]
-comette-plugin.workspace = true
+covey-plugin.workspace = true
 tokio = "1.41.1"

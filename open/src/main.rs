@@ -1,7 +1,7 @@
-use comette_plugin::{clone_async, rank, Action, Input, List, ListItem, Plugin, Result};
+use covey_plugin::{clone_async, rank, Action, Input, List, ListItem, Plugin, Result};
 
 mod config {
-    comette_plugin::generate_config!();
+    covey_plugin::generate_config!();
 }
 
 struct Open {
@@ -73,5 +73,5 @@ impl Plugin for Open {
 }
 
 fn main() {
-    comette_plugin::main::<Open>()
+    covey_plugin::main::<Open>()
 }

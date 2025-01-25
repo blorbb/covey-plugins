@@ -1,6 +1,6 @@
 use std::process::Stdio;
 
-use comette_plugin::{
+use covey_plugin::{
     anyhow::Context, clone_async, rank, Action, Input, List, ListItem, Plugin, Result,
 };
 use tokio::{fs, process::Command};
@@ -129,5 +129,5 @@ fn sql_query(query: &str) -> String {
 }
 
 fn main() {
-    comette_plugin::main::<Zealdoc>()
+    covey_plugin::main::<Zealdoc>()
 }

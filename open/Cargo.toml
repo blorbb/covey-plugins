@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-comette-plugin.workspace = true
+covey-plugin.workspace = true
 serde = { version = "1.0.214", features = ["derive"] }
 toml = { version = "0.8.19", default-features = false, features = ["parse"] }

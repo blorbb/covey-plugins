@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use comette_plugin::{List, ListItem, Plugin, Result};
+use covey_plugin::{List, ListItem, Plugin, Result};
 
 struct Echo;
 
@@ -18,5 +18,5 @@ impl Plugin for Echo {
 }
 
 fn main() {
-    comette_plugin::main::<Echo>()
+    covey_plugin::main::<Echo>()
 }
