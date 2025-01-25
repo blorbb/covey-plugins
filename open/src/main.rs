@@ -22,12 +22,12 @@ impl Plugin for Open {
                     .on_activate(clone_async!(
                         #[double]
                         prefix,
-                        || Ok(vec![Action::SetInput(Input::new(format!("{prefix} ")))])
+                        || Ok(Input::new(format!("{prefix} ")))
                     ))
                     .on_complete(clone_async!(
                         #[double]
                         prefix,
-                        || Ok(vec!(Action::SetInput(Input::new(format!("{prefix} ")))))
+                        || Ok(Input::new(format!("{prefix} ")))
                     ))
             })
             .collect::<Vec<_>>();
@@ -54,7 +54,7 @@ impl Plugin for Open {
             let search = ListItem::new(format!("Search {} for {}", target.name, new_query))
                 .with_description(replaced_url.clone())
                 .on_activate(clone_async!(replaced_url, || {
-                    Ok(vec![
+                    Ok([
                         Action::Close,
                         Action::RunCommand("xdg-open".to_string(), vec![replaced_url]),
                     ])

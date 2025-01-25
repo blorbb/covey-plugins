@@ -36,12 +36,12 @@ impl Plugin for Qalc {
             .on_activate(clone_async!(
                 #[double]
                 terse,
-                || Ok(vec![Action::Close, Action::Copy(terse)])
+                || Ok([Action::Close, Action::Copy(terse)])
             ))
             .on_alt_activate(clone_async!(line, || {
-                Ok(vec![Action::Close, Action::Copy(line)])
+                Ok([Action::Close, Action::Copy(line)])
             }))
-            .on_complete(clone_async!(terse, || Ok(vec![Action::SetInput(Input::new(terse))])));
+            .on_complete(clone_async!(terse, || Ok(Input::new(terse))));
         Ok(List::new(vec![item]))
     }
 }

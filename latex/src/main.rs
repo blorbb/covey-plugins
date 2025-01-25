@@ -24,11 +24,9 @@ impl Plugin for Latex {
                 ListItem::new(latex)
                     .with_icon_text(unicode)
                     .on_activate(clone_async!(unicode, || {
-                        Ok(vec![Action::Close, Action::Copy(unicode)])
+                        Ok([Action::Close, Action::Copy(unicode)])
                     }))
-                    .on_complete(clone_async!(|| Ok(vec![Action::SetInput(Input::new(
-                        unicode
-                    ))])))
+                    .on_complete(clone_async!(|| Ok(Input::new(unicode))))
             })
             .collect();
 

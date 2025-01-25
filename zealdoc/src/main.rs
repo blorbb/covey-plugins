@@ -51,12 +51,12 @@ impl Plugin for Zealdoc {
                     .on_activate(clone_async!(
                         #[double]
                         lang = docset.lang,
-                        || Ok(vec![Action::SetInput(Input::new(format!("{lang}:")))])
+                        || Ok(Input::new(format!("{lang}:")))
                     ))
                     .on_complete(clone_async!(
                         #[double]
                         lang = docset.lang,
-                        || Ok(vec![Action::SetInput(Input::new(format!("{lang}:")))])
+                        || Ok(Input::new(format!("{lang}:")))
                     ))
             })
             .collect();
@@ -96,7 +96,7 @@ impl Plugin for Zealdoc {
                             #[double]
                             stripped_query,
                             || {
-                                Ok(vec![
+                                Ok([
                                     Action::Close,
                                     Action::RunCommand(
                                         "zeal".to_string(),
@@ -110,7 +110,7 @@ impl Plugin for Zealdoc {
                             lang = docset.lang,
                             #[double]
                             line,
-                            || Ok(vec![Action::SetInput(Input::new(format!("{lang}:{line}")))])
+                            || Ok(Input::new(format!("{lang}:{line}")))
                         ))
                 })
                 .collect();
