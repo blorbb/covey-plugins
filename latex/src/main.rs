@@ -4,6 +4,8 @@ use covey_plugin::{clone_async, rank, Action, Input, List, ListItem, Plugin, Res
 // https://github.com/joom/latex-unicoder.vim/blob/master/autoload/unicoder.vim
 // with ',' removed for simpler parsing.
 
+covey_plugin::include_manifest!();
+
 struct Latex {
     info: Vec<ListItem>,
 }
@@ -24,7 +26,9 @@ impl Plugin for Latex {
                     .on_activate(clone_async!(unicode, || {
                         Ok(vec![Action::Close, Action::Copy(unicode)])
                     }))
-                    .on_complete(clone_async!(|| Ok(Some(Input::new(unicode)))))
+                    .on_complete(clone_async!(|| Ok(vec![Action::SetInput(Input::new(
+                        unicode
+                    ))])))
             })
             .collect();
 

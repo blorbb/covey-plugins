@@ -1,17 +1,15 @@
 use covey_plugin::{clone_async, rank, Action, Input, List, ListItem, Plugin, Result};
 
-mod config {
-    covey_plugin::generate_config!();
-}
+covey_plugin::include_manifest!();
 
 struct Open {
-    urls: Vec<(String, config::urls::UrlsValue)>,
+    urls: Vec<(String, urls::UrlsValue)>,
     // list items to show when the prompt does not match any of the url prefixes
     prefix_prompt: Vec<ListItem>,
 }
 
 impl Plugin for Open {
-    type Config = config::Config;
+    type Config = Config;
 
     async fn new(config: Self::Config) -> Result<Self> {
         let prefix_prompt = config
@@ -29,7 +27,7 @@ impl Plugin for Open {
                     .on_complete(clone_async!(
                         #[double]
                         prefix,
-                        || Ok(Some(Input::new(format!("{prefix} "))))
+                        || Ok(vec!(Action::SetInput(Input::new(format!("{prefix} ")))))
                     ))
             })
             .collect::<Vec<_>>();

@@ -3,6 +3,8 @@ use std::process::Stdio;
 use covey_plugin::{clone_async, Action, Input, List, ListItem, Plugin, Result};
 use tokio::process::Command;
 
+covey_plugin::include_manifest!();
+
 struct Qalc;
 
 async fn get_qalc_output(query: &str, extra_args: &[&str]) -> Result<String> {
@@ -39,7 +41,7 @@ impl Plugin for Qalc {
             .on_alt_activate(clone_async!(line, || {
                 Ok(vec![Action::Close, Action::Copy(line)])
             }))
-            .on_complete(clone_async!(terse, || Ok(Some(Input::new(terse)))));
+            .on_complete(clone_async!(terse, || Ok(vec![Action::SetInput(Input::new(terse))])));
         Ok(List::new(vec![item]))
     }
 }

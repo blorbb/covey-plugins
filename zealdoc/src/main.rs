@@ -6,6 +6,8 @@ use covey_plugin::{
 use tokio::{fs, process::Command};
 use tokio_stream::{wrappers::ReadDirStream, StreamExt};
 
+covey_plugin::include_manifest!();
+
 struct Docset {
     lang: String,
     path: String,
@@ -54,7 +56,7 @@ impl Plugin for Zealdoc {
                     .on_complete(clone_async!(
                         #[double]
                         lang = docset.lang,
-                        || Ok(Some(Input::new(format!("{lang}:"))))
+                        || Ok(vec![Action::SetInput(Input::new(format!("{lang}:")))])
                     ))
             })
             .collect();
@@ -108,7 +110,7 @@ impl Plugin for Zealdoc {
                             lang = docset.lang,
                             #[double]
                             line,
-                            || Ok(Some(Input::new(format!("{lang}:{line}"))))
+                            || Ok(vec![Action::SetInput(Input::new(format!("{lang}:{line}")))])
                         ))
                 })
                 .collect();

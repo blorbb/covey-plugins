@@ -6,6 +6,8 @@ use covey_plugin::{
 use serde::Deserialize;
 use tokio::fs;
 
+covey_plugin::include_manifest!();
+
 static PROJECTS_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
     let config_dir = dirs::config_dir().unwrap();
     config_dir.join("Code/User/globalStorage/alefragnani.project-manager/projects.json")

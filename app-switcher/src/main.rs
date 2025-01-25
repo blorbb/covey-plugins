@@ -3,6 +3,8 @@ use std::{process::Stdio, sync::LazyLock};
 use freedesktop_desktop_entry::{self as desktop, DesktopEntry};
 use covey_plugin::{anyhow::bail, clone_async, rank, Action, Icon, List, ListItem, Plugin, Result};
 
+covey_plugin::include_manifest!();
+
 struct AppSwitcher {
     entries: Vec<ListItem>,
 }
