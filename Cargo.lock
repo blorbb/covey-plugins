@@ -320,12 +320,12 @@ dependencies = [
  "parking_lot",
  "prost",
  "serde",
+ "serde_json",
  "sqlx",
  "sublime_fuzzy",
  "time",
  "tokio",
  "tokio-stream",
- "toml",
  "tonic",
  "tonic-build",
 ]
