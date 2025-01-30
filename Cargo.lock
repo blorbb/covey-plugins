@@ -290,7 +290,6 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 name = "covey-manifest"
 version = "0.1.0"
 dependencies = [
- "indexmap 2.6.0",
  "proc-macro2",
  "quote",
  "serde",
@@ -1043,7 +1042,6 @@ checksum = "707907fe3c25f5424cce2cb7e1cbcafee6bdbe735ca90ef77c29e84591e5b9da"
 dependencies = [
  "equivalent",
  "hashbrown 0.15.1",
- "serde",
 ]
 
 [[package]]

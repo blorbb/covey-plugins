@@ -1,3 +1,8 @@
 name = "App switcher"
 repository = "https://github.com/blorbb/covey-plugins"
 authors = ["blorbb"]
+
+[[schema]]
+id = "something"
+title = "Something here"
+type = { text = { min-length = 10, max-length = 20 } }
