@@ -131,5 +131,5 @@ fn sql_query(query: &str) -> String {
 }
 
 fn main() {
-    covey_plugin::main::<Zealdoc>()
+    covey_plugin::main::<Zealdoc>(env!("CARGO_PKG_NAME"))
 }

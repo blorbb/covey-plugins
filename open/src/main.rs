@@ -71,5 +71,5 @@ impl Plugin for Open {
 }
 
 fn main() {
-    covey_plugin::main::<Open>()
+    covey_plugin::main::<Open>(env!("CARGO_PKG_NAME"))
 }

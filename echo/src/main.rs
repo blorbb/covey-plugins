@@ -18,5 +18,5 @@ impl Plugin for Echo {
 }
 
 fn main() {
-    covey_plugin::main::<Echo>()
+    covey_plugin::main::<Echo>(env!("CARGO_PKG_NAME"))
 }

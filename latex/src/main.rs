@@ -45,5 +45,5 @@ impl Plugin for Latex {
 }
 
 fn main() {
-    covey_plugin::main::<Latex>();
+    covey_plugin::main::<Latex>(env!("CARGO_PKG_NAME"));
 }

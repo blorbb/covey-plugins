@@ -6,3 +6,41 @@ authors = ["blorbb"]
 id = "something"
 title = "Something here"
 type = { text = { min-length = 10, max-length = 20 } }
+
+[[schema]]
+id = "int"
+title = "Integer"
+type = { int = { min = 0, default = 1 } }
+
+[[schema]]
+id = "bool"
+title = "Bool"
+description = "this is a boolean value"
+type = "bool"
+
+[[schema]]
+id = "file"
+title = "File path"
+type = { file-path = { extension = ["md"] } }
+
+[[schema]]
+id = "file-any"
+title = "File path any"
+description = "whoai hawo ilthawo ahnw oah roiwh noailk hnsaoi.aw aoilr khjawnolir khnawjs ljhna haw.\noiajhwriolawhjrnaowr"
+type = "file-path"
+
+
+[[schema]]
+id = "folder"
+title = "folder path"
+type = "folder-path"
+
+[[schema]]
+id = "list"
+title = "List of text"
+type = { list = { item-type = "text", min-items = 1 } }
+
+[[schema]]
+id = "struct-thing"
+title = "Some struct"
+type = { struct = { fields = { thing = "int", thing2 = "bool" } } }

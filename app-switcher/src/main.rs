@@ -1,7 +1,7 @@
 use std::{process::Stdio, sync::LazyLock};
 
-use freedesktop_desktop_entry::{self as desktop, DesktopEntry};
 use covey_plugin::{anyhow::bail, clone_async, rank, Action, Icon, List, ListItem, Plugin, Result};
+use freedesktop_desktop_entry::{self as desktop, DesktopEntry};
 
 covey_plugin::include_manifest!();
 
@@ -116,5 +116,5 @@ static KDOTOOL_PATH: LazyLock<String> = LazyLock::new(|| {
 });
 
 fn main() {
-    covey_plugin::main::<AppSwitcher>()
+    covey_plugin::main::<AppSwitcher>(env!("CARGO_PKG_NAME"))
 }
