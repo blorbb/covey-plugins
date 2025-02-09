@@ -9,6 +9,7 @@ struct Qalc;
 
 async fn get_qalc_output(query: &str, extra_args: &[&str]) -> Result<String> {
     let output = Command::new("qalc")
+        .args(["-defaults", "-set", "upxrates 0"])
         .args(extra_args)
         .arg(query)
         .stdin(Stdio::null())
