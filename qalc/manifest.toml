@@ -2,3 +2,19 @@ name = "Qalculate"
 description = "Calculate using qalc"
 repository = "https://github.com/blorbb/covey-plugins"
 authors = ["blorbb"]
+
+[[commands]]
+id = "activate"
+title = "Copy result"
+default-hotkey = { key = "enter" }
+
+[[commands]]
+id = "alt-activate"
+title = "Copy equation"
+default-hotkey = { key = "enter", alt = true }
+
+[[commands]]
+id = "complete"
+title = "Insert result"
+description = "Replace the current input with the result"
+default-hotkey = { key = "tab" }
