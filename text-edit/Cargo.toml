@@ -1,0 +1,11 @@
+[package]
+name = "text-edit"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+covey-plugin.workspace = true
+base64 = "0.22"
+urlencoding = "2"
+html-escape = "0.2"
+convert_case = "0.7"

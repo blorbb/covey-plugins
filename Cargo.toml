@@ -1,5 +1,5 @@
 [workspace]
-members = ["echo", "app-switcher", "qalc", "code-projects", "open", "zealdoc", "latex"]
+members = ["echo", "app-switcher", "qalc", "code-projects", "open", "zealdoc", "latex", "text-edit"]
 resolver = "2"
 
 [workspace.dependencies]

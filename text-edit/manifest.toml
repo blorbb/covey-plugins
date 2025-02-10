@@ -1,0 +1,4 @@
+name = "Text edit"
+description = "Miscellaneous text editing utilities"
+repository = "https://github.com/blorbb/covey-plugins"
+authors = ["blorbb"]
