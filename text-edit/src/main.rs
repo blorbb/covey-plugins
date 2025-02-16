@@ -71,9 +71,11 @@ impl Plugin for TextEdit {
                                 .on_activate(clone_async!(
                                     #[double]
                                     cased,
-                                    || Ok(Action::Copy(cased))
+                                    || Ok(vec![Action::Close, Action::Copy(cased)])
                                 ))
-                                .on_complete(clone_async!(cased, || Ok(Input::new(cased))))
+                                .on_complete(clone_async!(cased, || Ok(Input::new(format!(
+                                    "case {cased}"
+                                )))))
                         })
                         .collect(),
                 )
@@ -86,13 +88,22 @@ impl Plugin for TextEdit {
                 List::new(vec![
                     ListItem::new(b64.clone())
                         .with_description("base64")
-                        .on_activate(clone_async!(b64, || Ok(Action::Copy(b64)))),
+                        .on_activate(clone_async!(b64, || Ok(vec![
+                            Action::Close,
+                            Action::Copy(b64)
+                        ]))),
                     ListItem::new(url.clone())
                         .with_description("url")
-                        .on_activate(clone_async!(url, || Ok(Action::Copy(url)))),
+                        .on_activate(clone_async!(url, || Ok(vec![
+                            Action::Close,
+                            Action::Copy(url)
+                        ]))),
                     ListItem::new(html.clone())
                         .with_description("html")
-                        .on_activate(clone_async!(html, || Ok(Action::Copy(html)))),
+                        .on_activate(clone_async!(html, || Ok(vec![
+                            Action::Close,
+                            Action::Copy(html)
+                        ]))),
                 ])
             }
             Some(("decode", arg)) => {
