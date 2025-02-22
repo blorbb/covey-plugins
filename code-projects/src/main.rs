@@ -43,10 +43,7 @@ impl Plugin for CodeProjects {
                     .with_description(value.root_path.clone())
                     .on_activate(clone_async!(path = value.root_path, || {
                         // https://github.com/brpaz/ulauncher-vscode-projects/blob/master/vscode_projects/listeners/item_enter.py
-                        Ok([
-                            Action::Close,
-                            Action::RunCommand("code".to_string(), vec![path]),
-                        ])
+                        Ok([Action::close(), Action::run_command("code", [path])])
                     }))
             })
             .collect::<Vec<_>>();

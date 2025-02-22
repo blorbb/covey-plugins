@@ -38,11 +38,11 @@ fn process_entry(entry: DesktopEntry, locales: &[impl AsRef<str>]) -> Option<Lis
             .on_activate(clone_async!(class, exec, || {
                 if !class.is_empty() {
                     if activate_kdotool(&class).await.is_ok() {
-                        return Ok(vec![Action::Close]);
+                        return Ok(vec![Action::close()]);
                     }
                 }
 
-                Ok(vec![Action::Close, Action::RunShell(exec)])
+                Ok(vec![Action::close(), Action::run_shell(exec)])
             })),
     )
 }

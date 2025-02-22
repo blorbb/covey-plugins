@@ -68,9 +68,9 @@ impl Plugin for TextEdit {
 
                             ListItem::new(cased.clone())
                                 .with_description(name)
-                                .on_activate(clone_async!(cased, || Ok(vec![
-                                    Action::Close,
-                                    Action::Copy(cased)
+                                .on_activate(clone_async!(cased, || Ok([
+                                    Action::close(),
+                                    Action::copy(cased)
                                 ])))
                                 .on_complete(clone_async!(cased, || Ok(Input::new(format!(
                                     "case {cased}"
@@ -87,21 +87,21 @@ impl Plugin for TextEdit {
                 List::new(vec![
                     ListItem::new(b64.clone())
                         .with_description("base64")
-                        .on_activate(clone_async!(b64, || Ok(vec![
-                            Action::Close,
-                            Action::Copy(b64)
+                        .on_activate(clone_async!(b64, || Ok([
+                            Action::close(),
+                            Action::copy(b64)
                         ]))),
                     ListItem::new(url.clone())
                         .with_description("url")
-                        .on_activate(clone_async!(url, || Ok(vec![
-                            Action::Close,
-                            Action::Copy(url)
+                        .on_activate(clone_async!(url, || Ok([
+                            Action::close(),
+                            Action::copy(url)
                         ]))),
                     ListItem::new(html.clone())
                         .with_description("html")
-                        .on_activate(clone_async!(html, || Ok(vec![
-                            Action::Close,
-                            Action::Copy(html)
+                        .on_activate(clone_async!(html, || Ok([
+                            Action::close(),
+                            Action::copy(html)
                         ]))),
                 ])
             }
@@ -114,6 +114,8 @@ impl Plugin for TextEdit {
                     .map(Cow::into_owned)
                     .map_err(|e| e.to_string());
                 let html = Ok(html_escape::decode_html_entities(arg).into_owned());
+
+                // reorder so that any errors will show up at the bottom
 
                 let (oks, errs): (Vec<_>, Vec<_>) = [(b64, "base64"), (url, "url"), (html, "html")]
                     .map(|(result, kind)| ((result.clone().ok(), kind), (result.err(), kind)))

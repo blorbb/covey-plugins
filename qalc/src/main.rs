@@ -35,11 +35,11 @@ impl Plugin for Qalc {
         let item = ListItem::new(line.clone())
             .with_icon_name("qalculate")
             .on_activate(clone_async!(terse, || Ok([
-                Action::Close,
-                Action::Copy(terse)
+                Action::close(),
+                Action::copy(terse)
             ])))
             .on_alt_activate(clone_async!(line, || {
-                Ok([Action::Close, Action::Copy(line)])
+                Ok([Action::close(), Action::copy(line)])
             }))
             .on_complete(clone_async!(terse, || Ok(Input::new(terse))));
         Ok(List::new(vec![item]))

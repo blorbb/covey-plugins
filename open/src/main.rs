@@ -51,8 +51,8 @@ impl Plugin for Open {
                 .with_description(replaced_url.clone())
                 .on_activate(clone_async!(replaced_url, || {
                     Ok([
-                        Action::Close,
-                        Action::RunCommand("xdg-open".to_string(), vec![replaced_url.clone()]),
+                        Action::close(),
+                        Action::run_command("xdg-open", [replaced_url]),
                     ])
                 }));
 
