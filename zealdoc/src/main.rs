@@ -48,16 +48,12 @@ impl Plugin for Zealdoc {
             .map(|docset| {
                 ListItem::new(&docset.lang)
                     .with_icon_name("zeal")
-                    .on_activate(clone_async!(
-                        #[double]
-                        lang = docset.lang,
-                        || Ok(Input::new(format!("{lang}:")))
-                    ))
-                    .on_complete(clone_async!(
-                        #[double]
-                        lang = docset.lang,
-                        || Ok(Input::new(format!("{lang}:")))
-                    ))
+                    .on_activate(clone_async!(lang = docset.lang, || Ok(Input::new(
+                        format!("{lang}:")
+                    ))))
+                    .on_complete(clone_async!(lang = docset.lang, || Ok(Input::new(
+                        format!("{lang}:")
+                    ))))
             })
             .collect();
 
@@ -90,28 +86,18 @@ impl Plugin for Zealdoc {
                 .map(|line| {
                     ListItem::new(line)
                         .with_icon_name("zeal")
-                        .on_activate(clone_async!(
-                            #[double]
-                            lang = docset.lang,
-                            #[double]
-                            stripped_query,
-                            || {
-                                Ok([
-                                    Action::Close,
-                                    Action::RunCommand(
-                                        "zeal".to_string(),
-                                        vec![format!("{lang}:{stripped_query}")],
-                                    ),
-                                ])
-                            }
-                        ))
-                        .on_complete(clone_async!(
-                            #[double]
-                            lang = docset.lang,
-                            #[double]
-                            line,
-                            || Ok(Input::new(format!("{lang}:{line}")))
-                        ))
+                        .on_activate(clone_async!(lang = docset.lang, stripped_query, || {
+                            Ok([
+                                Action::Close,
+                                Action::RunCommand(
+                                    "zeal".to_string(),
+                                    vec![format!("{lang}:{stripped_query}")],
+                                ),
+                            ])
+                        }))
+                        .on_complete(clone_async!(lang = docset.lang, line, || Ok(Input::new(
+                            format!("{lang}:{line}")
+                        ))))
                 })
                 .collect();
             Ok(List::new(items))

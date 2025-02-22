@@ -68,11 +68,10 @@ impl Plugin for TextEdit {
 
                             ListItem::new(cased.clone())
                                 .with_description(name)
-                                .on_activate(clone_async!(
-                                    #[double]
-                                    cased,
-                                    || Ok(vec![Action::Close, Action::Copy(cased)])
-                                ))
+                                .on_activate(clone_async!(cased, || Ok(vec![
+                                    Action::Close,
+                                    Action::Copy(cased)
+                                ])))
                                 .on_complete(clone_async!(cased, || Ok(Input::new(format!(
                                     "case {cased}"
                                 )))))

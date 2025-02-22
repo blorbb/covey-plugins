@@ -19,16 +19,12 @@ impl Plugin for Open {
                 ListItem::new(format!("{prefix}: {}", target.name))
                     .with_description(&target.url)
                     // do the same thing as complete
-                    .on_activate(clone_async!(
-                        #[double]
-                        prefix,
-                        || Ok(Input::new(format!("{prefix} ")))
-                    ))
-                    .on_complete(clone_async!(
-                        #[double]
-                        prefix,
-                        || Ok(Input::new(format!("{prefix} ")))
-                    ))
+                    .on_activate(clone_async!(prefix, || Ok(Input::new(format!(
+                        "{prefix} "
+                    )))))
+                    .on_complete(clone_async!(prefix, || Ok(Input::new(format!(
+                        "{prefix} "
+                    )))))
             })
             .collect::<Vec<_>>();
 
@@ -56,7 +52,7 @@ impl Plugin for Open {
                 .on_activate(clone_async!(replaced_url, || {
                     Ok([
                         Action::Close,
-                        Action::RunCommand("xdg-open".to_string(), vec![replaced_url]),
+                        Action::RunCommand("xdg-open".to_string(), vec![replaced_url.clone()]),
                     ])
                 }));
 
