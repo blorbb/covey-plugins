@@ -1,10 +1,10 @@
 use std::process::Stdio;
 
 use covey_plugin::{
-    anyhow::Context, clone_async, rank, Action, Input, List, ListItem, Plugin, Result,
+    Action, Input, List, ListItem, Plugin, Result, anyhow::Context, clone_async, rank,
 };
 use tokio::{fs, process::Command};
-use tokio_stream::{wrappers::ReadDirStream, StreamExt};
+use tokio_stream::{StreamExt, wrappers::ReadDirStream};
 
 covey_plugin::include_manifest!();
 

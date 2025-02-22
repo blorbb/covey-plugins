@@ -1,10 +1,10 @@
 [package]
 name = "app-switcher"
 version = "0.1.0"
-edition = "2021"
+edition.workspace = true
 metadata.workspace = true
 
 [dependencies]
-freedesktop-desktop-entry = "0.7.5"
+freedesktop-desktop-entry = "0.7.7"
 covey-plugin.workspace = true
 tokio = { version = "1.41.1", features = ["fs", "process"] }

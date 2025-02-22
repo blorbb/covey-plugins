@@ -1,6 +1,18 @@
 [workspace]
-members = ["echo", "app-switcher", "qalc", "code-projects", "open", "zealdoc", "latex", "text-edit"]
+members = [
+    "echo",
+    "app-switcher",
+    "qalc",
+    "code-projects",
+    "open",
+    "zealdoc",
+    "latex",
+    "text-edit",
+]
 resolver = "2"
+
+[workspace.package]
+edition = "2024"
 
 [workspace.dependencies]
 covey-plugin = { path = "../covey/covey-plugin" }

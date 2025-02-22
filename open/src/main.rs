@@ -1,4 +1,4 @@
-use covey_plugin::{clone_async, rank, Action, Input, List, ListItem, Plugin, Result};
+use covey_plugin::{Action, Input, List, ListItem, Plugin, Result, clone_async, rank};
 
 covey_plugin::include_manifest!();
 

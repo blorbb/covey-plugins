@@ -1,6 +1,6 @@
 use std::process::Stdio;
 
-use covey_plugin::{clone_async, Action, Input, List, ListItem, Plugin, Result};
+use covey_plugin::{Action, Input, List, ListItem, Plugin, Result, clone_async};
 use tokio::process::Command;
 
 covey_plugin::include_manifest!();

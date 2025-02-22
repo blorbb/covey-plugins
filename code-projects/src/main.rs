@@ -1,7 +1,7 @@
 use std::{path::PathBuf, sync::LazyLock};
 
 use covey_plugin::{
-    anyhow::Context as _, clone_async, rank, Action, List, ListItem, Plugin, Result,
+    Action, List, ListItem, Plugin, Result, anyhow::Context as _, clone_async, rank,
 };
 use serde::Deserialize;
 use tokio::fs;

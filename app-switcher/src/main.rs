@@ -1,6 +1,6 @@
 use std::{process::Stdio, sync::LazyLock};
 
-use covey_plugin::{anyhow::bail, clone_async, rank, Action, Icon, List, ListItem, Plugin, Result};
+use covey_plugin::{Action, Icon, List, ListItem, Plugin, Result, anyhow::bail, clone_async, rank};
 use freedesktop_desktop_entry::{self as desktop, DesktopEntry};
 
 covey_plugin::include_manifest!();
@@ -9,7 +9,7 @@ struct AppSwitcher {
     entries: Vec<ListItem>,
 }
 
-fn process_entry(entry: DesktopEntry<'_>, locales: &[impl AsRef<str>]) -> Option<ListItem> {
+fn process_entry(entry: DesktopEntry, locales: &[impl AsRef<str>]) -> Option<ListItem> {
     // filter out some desktop entries that are probably irrelevant
     // has NoDisplay, or no Icon attribute, or all it's categories are useless.
     if entry.no_display()

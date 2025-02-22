@@ -44,3 +44,14 @@ type = { list = { item-type = "text", min-items = 1 } }
 id = "struct-thing"
 title = "Some struct"
 type = { struct = { fields = { thing = "int", thing2 = "bool" } } }
+
+[[schema]]
+id = "selection-thing"
+title = "Some selection"
+type.selection.allowed-values = ["this", "thing", "or", "that-thing"]
+
+[[schema]]
+id = "selection-thing-with-default"
+title = "Some selection with default"
+type.selection.allowed-values = ["this", "thing", "or", "that-thing"]
+type.selection.default = "that-thing"
