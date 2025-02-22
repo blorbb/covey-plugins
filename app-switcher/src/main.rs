@@ -116,5 +116,5 @@ static KDOTOOL_PATH: LazyLock<String> = LazyLock::new(|| {
 });
 
 fn main() {
-    covey_plugin::main::<AppSwitcher>(env!("CARGO_PKG_NAME"))
+    covey_plugin::run_server::<AppSwitcher>(env!("CARGO_PKG_NAME"))
 }

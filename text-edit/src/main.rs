@@ -140,5 +140,5 @@ impl Plugin for TextEdit {
 }
 
 fn main() {
-    covey_plugin::main::<TextEdit>(env!("CARGO_PKG_NAME"));
+    covey_plugin::run_server::<TextEdit>(env!("CARGO_PKG_NAME"));
 }

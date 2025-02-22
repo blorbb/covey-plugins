@@ -47,5 +47,5 @@ impl Plugin for Qalc {
 }
 
 fn main() {
-    covey_plugin::main::<Qalc>(env!("CARGO_PKG_NAME"))
+    covey_plugin::run_server::<Qalc>(env!("CARGO_PKG_NAME"))
 }

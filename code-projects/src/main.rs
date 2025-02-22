@@ -58,5 +58,5 @@ impl Plugin for CodeProjects {
 }
 
 fn main() {
-    covey_plugin::main::<CodeProjects>(env!("CARGO_PKG_NAME"));
+    covey_plugin::run_server::<CodeProjects>(env!("CARGO_PKG_NAME"));
 }
