@@ -36,10 +36,8 @@ fn process_entry(entry: DesktopEntry, locales: &[impl AsRef<str>]) -> Option<Lis
             .with_description(entry.comment(locales).unwrap_or_default())
             .with_icon(entry.icon().map(|name| Icon::Name(name.to_string())))
             .on_activate(clone_async!(class, exec, || {
-                if !class.is_empty() {
-                    if activate_kdotool(&class).await.is_ok() {
-                        return Ok(vec![Action::close()]);
-                    }
+                if !class.is_empty() && activate_kdotool(&class).await.is_ok() {
+                    return Ok(vec![Action::close()]);
                 }
 
                 Ok(vec![Action::close(), Action::run_shell(exec)])
