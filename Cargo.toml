@@ -8,6 +8,7 @@ members = [
     "zealdoc",
     "latex",
     "text-edit",
+    "system-power",
 ]
 resolver = "2"
 

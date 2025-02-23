@@ -1,0 +1,9 @@
+name = "System Power Controls"
+description = "Control system power (shutdown, restart, sleep, etc)"
+repository = "https://github.com/blorbb/covey-plugins"
+authors = ["blorbb"]
+
+[[commands]]
+id = "activate"
+title = "Activate"
+default-hotkey = { key = "enter" }
