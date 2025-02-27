@@ -6,15 +6,15 @@ authors = ["blorbb"]
 [[commands]]
 id = "activate"
 title = "Copy result"
-default-hotkey = { key = "enter" }
+default-hotkeys = [{ key = "enter" }]
 
 [[commands]]
 id = "alt-activate"
 title = "Copy equation"
-default-hotkey = { key = "enter", alt = true }
+default-hotkeys = [{ key = "enter", alt = true }]
 
 [[commands]]
 id = "complete"
 title = "Insert result"
 description = "Replace the current input with the result"
-default-hotkey = { key = "tab" }
+default-hotkeys = [{ key = "tab" }]

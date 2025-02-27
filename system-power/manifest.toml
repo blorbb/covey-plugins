@@ -6,4 +6,4 @@ authors = ["blorbb"]
 [[commands]]
 id = "activate"
 title = "Activate"
-default-hotkey = { key = "enter" }
+default-hotkeys = [{ key = "enter" }]
