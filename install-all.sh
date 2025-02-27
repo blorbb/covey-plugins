@@ -1,8 +1,10 @@
 #!/usr/bin/env sh
 
 SCRIPT_PATH=$(dirname "$(realpath -s "$0")")
+cd "$SCRIPT_PATH"
 
-for directory in "$SCRIPT_PATH/"*/ ; do
+# directory must be of the form "pluginname/"
+for directory in */ ; do
     directory=${directory%*/}  # remove the trailing "/"
     # directory does not contain "target"
     if [[ ! "$directory" =~ "target" ]]; then
