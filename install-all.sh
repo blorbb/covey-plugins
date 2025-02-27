@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 
-for directory in */ ; do
+SCRIPT_PATH=$(dirname "$(realpath -s "$0")")
+
+for directory in "$SCRIPT_PATH/"*/ ; do
     directory=${directory%*/}  # remove the trailing "/"
     # directory does not contain "target"
     if [[ ! "$directory" =~ "target" ]]; then
