@@ -2,3 +2,13 @@ name = "Text edit"
 description = "Miscellaneous text editing utilities"
 repository = "https://github.com/blorbb/covey-plugins"
 authors = ["blorbb"]
+
+[[commands]]
+id = "activate"
+title = "Copy"
+default-hotkeys = [{ key = "enter" }]
+
+[[commands]]
+id = "complete"
+title = "Complete"
+default-hotkeys = [{ key = "enter" }, { key = "tab" }]
