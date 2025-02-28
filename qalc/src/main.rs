@@ -26,6 +26,8 @@ impl Plugin for Qalc {
     type Config = ();
 
     async fn new(_: ()) -> Result<Self> {
+        // update exchange rates
+        Command::new("qalc").args(["--exrates", "--", ""]).spawn()?;
         Ok(Self)
     }
 
