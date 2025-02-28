@@ -32,17 +32,20 @@ impl Plugin for Qalc {
     }
 
     async fn query(&self, query: String) -> Result<List> {
-        let line = get_qalc_output(&query, &[]).await?;
+        let equation = get_qalc_output(&query, &[]).await?;
         let terse = get_qalc_output(&query, &["-t"]).await?;
 
-        let item = ListItem::new(line.clone())
+        let item = ListItem::new(equation.clone())
             .with_icon_name("qalculate")
             .on_activate(clone_async!(terse, || Ok([
                 Action::close(),
                 Action::copy(terse)
             ])))
-            .on_alt_activate(clone_async!(line, || {
-                Ok([Action::close(), Action::copy(line)])
+            .on_alt_activate(clone_async!(equation, || {
+                Ok([
+                    Action::close(),
+                    Action::copy(equation.lines().last().unwrap_or_default()),
+                ])
             }))
             .on_complete(clone_async!(terse, || Ok(Input::new(terse))));
         Ok(List::new(vec![item]))
