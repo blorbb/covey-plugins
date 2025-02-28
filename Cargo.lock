@@ -472,22 +472,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "covey-config"
+name = "covey-manifest-macros"
 version = "0.1.0"
 dependencies = [
- "proc-macro2",
- "quote",
- "serde",
- "serde_json",
- "syn 2.0.98",
- "toml",
-]
-
-[[package]]
-name = "covey-config-macro"
-version = "0.1.0"
-dependencies = [
- "covey-config",
+ "covey-schema",
  "proc-macro-error2",
  "proc-macro2",
  "quote",
@@ -500,8 +488,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "az",
- "covey-config",
- "covey-config-macro",
+ "covey-manifest-macros",
  "dirs",
  "parking_lot",
  "prost",
@@ -513,6 +500,18 @@ dependencies = [
  "tokio-stream",
  "tonic",
  "tonic-build",
+]
+
+[[package]]
+name = "covey-schema"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn 2.0.98",
+ "toml",
 ]
 
 [[package]]
