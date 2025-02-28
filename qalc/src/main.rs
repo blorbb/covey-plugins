@@ -55,3 +55,32 @@ impl Plugin for Qalc {
 fn main() {
     covey_plugin::run_server::<Qalc>(env!("CARGO_PKG_NAME"))
 }
+
+#[cfg(test)]
+mod tests {
+    use covey_plugin::{Action, Plugin, Result, anyhow::Context};
+
+    use crate::Qalc;
+
+    #[tokio::test]
+    async fn no_warnings_in_equation_output() -> Result<()> {
+        // 1+ causes a warning in the output:
+        // warning: Misplaced operator(s) "+" ignored
+
+        let result = Qalc.query("1+".to_string()).await?;
+
+        let Action::Copy(copy_str) = &result.items[0]
+            .call_command("alt-activate")
+            .await
+            .context("no alt activate")??
+            .list[1]
+        // 0 is close action, 1 is copy
+        else {
+            panic!("action should be copy")
+        };
+
+        assert_eq!(copy_str, "1 = 1");
+
+        Ok(())
+    }
+}
