@@ -4,12 +4,12 @@ repository = "https://github.com/blorbb/covey-plugins"
 authors = ["blorbb"]
 
 [[commands]]
-id = "activate"
+id = "copy"
 title = "Copy result"
 default-hotkeys = [{ key = "enter" }]
 
 [[commands]]
-id = "alt-activate"
+id = "copy-equation"
 title = "Copy equation"
 default-hotkeys = [{ key = "enter", alt = true }]
 

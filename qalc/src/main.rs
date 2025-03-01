@@ -37,11 +37,11 @@ impl Plugin for Qalc {
 
         let item = ListItem::new(equation.clone())
             .with_icon_name("qalculate")
-            .on_activate(clone_async!(terse, || Ok([
+            .on_copy(clone_async!(terse, || Ok([
                 Action::close(),
                 Action::copy(terse)
             ])))
-            .on_alt_activate(clone_async!(equation, || {
+            .on_copy_equation(clone_async!(equation, || {
                 Ok([
                     Action::close(),
                     Action::copy(equation.lines().last().unwrap_or_default()),
@@ -70,9 +70,9 @@ mod tests {
         let result = Qalc.query("1+".to_string()).await?;
 
         let Action::Copy(copy_str) = &result.items[0]
-            .call_command("alt-activate")
+            .call_command("copy-equation")
             .await
-            .context("no alt activate")??
+            .context("no copy equation")??
             .list[1]
         // 0 is close action, 1 is copy
         else {
