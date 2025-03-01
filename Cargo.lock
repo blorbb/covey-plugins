@@ -1609,6 +1609,8 @@ name = "qalc"
 version = "0.1.0"
 dependencies = [
  "covey-plugin",
+ "serde",
+ "serde_json",
  "tokio",
 ]
 

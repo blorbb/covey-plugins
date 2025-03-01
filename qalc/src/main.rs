@@ -1,11 +1,130 @@
-use std::process::Stdio;
+use std::{
+    process::Stdio,
+    sync::{Arc, RwLock},
+};
 
 use covey_plugin::{Action, Input, List, ListItem, Plugin, Result, clone_async};
+use serde::{Deserialize, Serialize};
 use tokio::process::Command;
 
 covey_plugin::include_manifest!();
 
-struct Qalc;
+#[derive(Debug, Serialize, Deserialize)]
+struct HistoryEntry {
+    query: String,
+    equation: String,
+    result: String,
+}
+
+#[derive(Clone, Default)]
+struct Qalc {
+    history: Arc<RwLock<Vec<HistoryEntry>>>,
+}
+
+impl Plugin for Qalc {
+    type Config = ();
+
+    async fn new(_: ()) -> Result<Self> {
+        // update exchange rates
+        Command::new("qalc").args(["--exrates", "--", ""]).spawn()?;
+
+        let history = try_read_history().await.unwrap_or_default();
+        Ok(Self {
+            history: Arc::new(RwLock::new(history)),
+        })
+    }
+
+    async fn query(&self, query: String) -> Result<List> {
+        let output = get_qalc_output(&query, &[]).await?;
+        let equation = output.lines().last().unwrap_or_default().to_string();
+        let terse = get_qalc_output(&query, &["-t"]).await?;
+
+        let item = ListItem::new(output)
+            .with_icon_name("qalculate")
+            .on_copy(clone_async!(this = self, query, equation, terse, || {
+                this.add_to_history(&query, equation, &terse);
+                Ok([
+                    Action::close(),
+                    Action::copy(terse),
+                    Action::set_input(Input::new(query)),
+                ])
+            }))
+            .on_copy_equation(clone_async!(this = self, query, equation, terse, || {
+                this.add_to_history(&query, &equation, terse);
+                Ok([
+                    Action::close(),
+                    Action::copy(equation),
+                    Action::set_input(Input::new(query)),
+                ])
+            }))
+            .on_complete(clone_async!(this = self, query, equation, terse, || {
+                this.add_to_history(&query, equation, &terse);
+                Ok(Input::new(terse))
+            }));
+
+        // add history items
+        let history = self.history.read().unwrap();
+        let history = history.iter().rev().map(
+            |HistoryEntry {
+                 query: history_query,
+                 equation,
+                 result,
+             }| {
+                ListItem::new(equation)
+                    .on_append_history_result(clone_async!(query, result, || Ok(Input::new(
+                        format!("{query}{result}")
+                    ))))
+                    .on_insert_history_query(clone_async!(history_query, || Ok(Input::new(
+                        history_query
+                    ))))
+            },
+        );
+
+        Ok(List::new(std::iter::once(item).chain(history).collect()))
+    }
+}
+
+impl Qalc {
+    pub fn add_to_history(
+        &self,
+        query: &str,
+        equation: impl Into<String>,
+        result: impl Into<String>,
+    ) {
+        // only add to history if the query changed
+        let mut history = self.history.write().unwrap();
+        if history.last().is_none_or(|last| last.query != query) {
+            let entry = HistoryEntry {
+                query: query.to_string(),
+                equation: equation.into(),
+                result: result.into(),
+            };
+            history.push(entry);
+
+            // only keep up to 500 items
+            let len = history.len();
+            history.drain(..len.saturating_sub(500));
+
+            let json = serde_json::to_string(&*history).expect("serialization should not fail");
+            tokio::spawn(async move {
+                tokio::fs::write(history_file_path(), json)
+                    .await
+                    .expect("(TODO) oops failed to write to file");
+            });
+        }
+    }
+}
+
+fn history_file_path() -> std::path::PathBuf {
+    covey_plugin::plugin_data_dir().join("history.json")
+}
+
+async fn try_read_history() -> std::io::Result<Vec<HistoryEntry>> {
+    let entries: Vec<HistoryEntry> =
+        serde_json::from_slice(&tokio::fs::read(history_file_path()).await?)?;
+
+    Ok(entries)
+}
 
 async fn get_qalc_output(query: &str, extra_args: &[&str]) -> Result<String> {
     let output = Command::new("qalc")
@@ -20,36 +139,6 @@ async fn get_qalc_output(query: &str, extra_args: &[&str]) -> Result<String> {
         .await?;
 
     Ok(String::from_utf8(output.stdout)?.trim().to_string())
-}
-
-impl Plugin for Qalc {
-    type Config = ();
-
-    async fn new(_: ()) -> Result<Self> {
-        // update exchange rates
-        Command::new("qalc").args(["--exrates", "--", ""]).spawn()?;
-        Ok(Self)
-    }
-
-    async fn query(&self, query: String) -> Result<List> {
-        let equation = get_qalc_output(&query, &[]).await?;
-        let terse = get_qalc_output(&query, &["-t"]).await?;
-
-        let item = ListItem::new(equation.clone())
-            .with_icon_name("qalculate")
-            .on_copy(clone_async!(terse, || Ok([
-                Action::close(),
-                Action::copy(terse)
-            ])))
-            .on_copy_equation(clone_async!(equation, || {
-                Ok([
-                    Action::close(),
-                    Action::copy(equation.lines().last().unwrap_or_default()),
-                ])
-            }))
-            .on_complete(clone_async!(terse, || Ok(Input::new(terse))));
-        Ok(List::new(vec![item]))
-    }
 }
 
 fn main() {
@@ -67,7 +156,7 @@ mod tests {
         // 1+ causes a warning in the output:
         // warning: Misplaced operator(s) "+" ignored
 
-        let result = Qalc.query("1+".to_string()).await?;
+        let result = Qalc::default().query("1+".to_string()).await?;
 
         let Action::Copy(copy_str) = &result.items[0]
             .call_command("copy-equation")
