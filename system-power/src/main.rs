@@ -1,16 +1,16 @@
 use std::io;
 
 use covey_plugin::{
-    Action, List, ListItem, Plugin, Result,
+    List, ListItem, Menu, Plugin, Result,
     rank::{self, Weights},
 };
 
 covey_plugin::include_manifest!();
 
-fn run_then_close(f: impl Fn() -> io::Result<()> + 'static) -> impl AsyncFn() -> Result<Action> {
-    async move || {
-        f()?;
-        Ok(Action::close())
+fn run_then_close(f: impl Fn() -> io::Result<()> + 'static) -> impl AsyncFn(Menu) -> Result<()> {
+    async move |menu| {
+        menu.close();
+        Ok(f()?)
     }
 }
 

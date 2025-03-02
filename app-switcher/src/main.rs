@@ -1,6 +1,6 @@
 use std::{process::Stdio, sync::LazyLock};
 
-use covey_plugin::{Action, Icon, List, ListItem, Plugin, Result, anyhow::bail, clone_async, rank};
+use covey_plugin::{Icon, List, ListItem, Plugin, Result, anyhow::bail, clone_async, rank, spawn};
 use freedesktop_desktop_entry::{self as desktop, DesktopEntry};
 
 covey_plugin::include_manifest!();
@@ -35,12 +35,13 @@ fn process_entry(entry: DesktopEntry, locales: &[impl AsRef<str>]) -> Option<Lis
         ListItem::new(entry.name(locales)?)
             .with_description(entry.comment(locales).unwrap_or_default())
             .with_icon(entry.icon().map(|name| Icon::Name(name.to_string())))
-            .on_activate(clone_async!(class, exec, || {
-                if !class.is_empty() && activate_kdotool(&class).await.is_ok() {
-                    return Ok(vec![Action::close()]);
+            .on_activate(clone_async!(class, exec, |menu| {
+                menu.close();
+                if class.is_empty() || activate_kdotool(&class).await.is_ok() {
+                    spawn::script(exec)?;
                 }
 
-                Ok(vec![Action::close(), Action::run_shell(exec)])
+                Ok(())
             })),
     )
 }

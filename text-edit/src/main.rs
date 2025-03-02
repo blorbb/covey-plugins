@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use base64::{Engine, prelude::BASE64_STANDARD};
 use convert_case::{Boundary, Case, Casing};
 use covey_plugin::{
-    Action, Input, List, ListItem, Plugin, Result, clone_async,
+    Input, List, ListItem, Plugin, Result, clone_async,
     rank::{self, Weights},
 };
 
@@ -24,12 +24,18 @@ impl Plugin for TextEdit {
                 rank::rank(
                     &query,
                     vec![
-                        &ListItem::new("case")
-                            .on_complete(|| async move { Ok(Input::new("case ")) }),
-                        &ListItem::new("encode")
-                            .on_complete(|| async move { Ok(Input::new("encode ")) }),
-                        &ListItem::new("decode")
-                            .on_complete(|| async move { Ok(Input::new("decode ")) }),
+                        &ListItem::new("case").on_complete(async |menu| {
+                            menu.set_input(Input::new("case "));
+                            Ok(())
+                        }),
+                        &ListItem::new("encode").on_complete(async |menu| {
+                            menu.set_input(Input::new("encode "));
+                            Ok(())
+                        }),
+                        &ListItem::new("decode").on_complete(async |menu| {
+                            menu.set_input(Input::new("decode "));
+                            Ok(())
+                        }),
                     ],
                     Weights::with_history(),
                 )
@@ -68,13 +74,15 @@ impl Plugin for TextEdit {
 
                             ListItem::new(cased.clone())
                                 .with_description(name)
-                                .on_activate(clone_async!(cased, || Ok([
-                                    Action::close(),
-                                    Action::copy(cased)
-                                ])))
-                                .on_complete(clone_async!(cased, || Ok(Input::new(format!(
-                                    "case {cased}"
-                                )))))
+                                .on_activate(clone_async!(cased, |menu| {
+                                    menu.close();
+                                    menu.copy(cased);
+                                    Ok(())
+                                }))
+                                .on_complete(clone_async!(cased, |menu| {
+                                    menu.set_input(Input::new(format!("case {cased}")));
+                                    Ok(())
+                                }))
                         })
                         .collect(),
                 )
@@ -87,22 +95,25 @@ impl Plugin for TextEdit {
                 List::new(vec![
                     ListItem::new(b64.clone())
                         .with_description("base64")
-                        .on_activate(clone_async!(b64, || Ok([
-                            Action::close(),
-                            Action::copy(b64)
-                        ]))),
+                        .on_activate(clone_async!(b64, |menu| {
+                            menu.close();
+                            menu.copy(b64);
+                            Ok(())
+                        })),
                     ListItem::new(url.clone())
                         .with_description("url")
-                        .on_activate(clone_async!(url, || Ok([
-                            Action::close(),
-                            Action::copy(url)
-                        ]))),
+                        .on_activate(clone_async!(url, |menu| {
+                            menu.close();
+                            menu.copy(url);
+                            Ok(())
+                        })),
                     ListItem::new(html.clone())
                         .with_description("html")
-                        .on_activate(clone_async!(html, || Ok([
-                            Action::close(),
-                            Action::copy(html)
-                        ]))),
+                        .on_activate(clone_async!(html, |menu| {
+                            menu.close();
+                            menu.copy(html);
+                            Ok(())
+                        })),
                 ])
             }
             Some(("decode", arg)) => {

@@ -1,4 +1,4 @@
-use covey_plugin::{Action, Input, List, ListItem, Plugin, Result, clone_async, rank};
+use covey_plugin::{Input, List, ListItem, Plugin, Result, clone_async, rank, spawn};
 
 covey_plugin::include_manifest!();
 
@@ -19,12 +19,14 @@ impl Plugin for Open {
                 ListItem::new(format!("{prefix}: {}", target.name))
                     .with_description(&target.url)
                     // do the same thing as complete
-                    .on_activate(clone_async!(prefix, || Ok(Input::new(format!(
-                        "{prefix} "
-                    )))))
-                    .on_complete(clone_async!(prefix, || Ok(Input::new(format!(
-                        "{prefix} "
-                    )))))
+                    .on_activate(clone_async!(prefix, |menu| {
+                        menu.set_input(Input::new(format!("{prefix} ")));
+                        Ok(())
+                    }))
+                    .on_complete(clone_async!(prefix, |menu| {
+                        menu.set_input(Input::new(format!("{prefix} ")));
+                        Ok(())
+                    }))
             })
             .collect::<Vec<_>>();
 
@@ -49,11 +51,10 @@ impl Plugin for Open {
 
             let search = ListItem::new(format!("Search {} for {}", target.name, new_query))
                 .with_description(replaced_url.clone())
-                .on_activate(clone_async!(replaced_url, || {
-                    Ok([
-                        Action::close(),
-                        Action::run_command("xdg-open", [replaced_url]),
-                    ])
+                .on_activate(clone_async!(replaced_url, |menu| {
+                    menu.close();
+                    spawn::program("xdg-open", [replaced_url])?;
+                    Ok(())
                 }));
 
             Ok(List::new(vec![search]))

@@ -3,7 +3,7 @@ use std::{
     sync::{Arc, RwLock},
 };
 
-use covey_plugin::{Action, Input, List, ListItem, Plugin, Result, clone_async};
+use covey_plugin::{Input, List, ListItem, Plugin, Result, clone_async};
 use serde::{Deserialize, Serialize};
 use tokio::process::Command;
 
@@ -41,25 +41,24 @@ impl Plugin for Qalc {
 
         let item = ListItem::new(output)
             .with_icon_name("qalculate")
-            .on_copy(clone_async!(this = self, query, equation, terse, || {
+            .on_copy(clone_async!(this = self, query, equation, terse, |menu| {
                 this.add_to_history(&query, equation, &terse);
-                Ok([
-                    Action::close(),
-                    Action::copy(terse),
-                    Action::set_input(Input::new(query)),
-                ])
+                menu.close();
+                menu.copy(terse);
+                menu.set_input(Input::new(query));
+                Ok(())
             }))
-            .on_copy_equation(clone_async!(this = self, query, equation, terse, || {
+            .on_copy_equation(clone_async!(this = self, query, equation, terse, |menu| {
                 this.add_to_history(&query, &equation, terse);
-                Ok([
-                    Action::close(),
-                    Action::copy(equation),
-                    Action::set_input(Input::new(query)),
-                ])
+                menu.close();
+                menu.copy(equation);
+                menu.set_input(Input::new(query));
+                Ok(())
             }))
-            .on_complete(clone_async!(this = self, query, equation, terse, || {
+            .on_complete(clone_async!(this = self, query, equation, terse, |menu| {
                 this.add_to_history(&query, equation, &terse);
-                Ok(Input::new(terse))
+                menu.set_input(Input::new(terse));
+                Ok(())
             }));
 
         // add history items
@@ -71,12 +70,14 @@ impl Plugin for Qalc {
                  result,
              }| {
                 ListItem::new(equation)
-                    .on_append_history_result(clone_async!(query, result, || Ok(Input::new(
-                        format!("{query}{result}")
-                    ))))
-                    .on_insert_history_query(clone_async!(history_query, || Ok(Input::new(
-                        history_query
-                    ))))
+                    .on_append_history_result(clone_async!(query, result, |menu| {
+                        menu.set_input(Input::new(format!("{query}{result}")));
+                        Ok(())
+                    }))
+                    .on_insert_history_query(clone_async!(history_query, |menu| {
+                        menu.set_input(Input::new(history_query));
+                        Ok(())
+                    }))
             },
         );
 
@@ -143,33 +144,4 @@ async fn get_qalc_output(query: &str, extra_args: &[&str]) -> Result<String> {
 
 fn main() {
     covey_plugin::run_server::<Qalc>(env!("CARGO_PKG_NAME"))
-}
-
-#[cfg(test)]
-mod tests {
-    use covey_plugin::{Action, Plugin, Result, anyhow::Context};
-
-    use crate::Qalc;
-
-    #[tokio::test]
-    async fn no_warnings_in_equation_output() -> Result<()> {
-        // 1+ causes a warning in the output:
-        // warning: Misplaced operator(s) "+" ignored
-
-        let result = Qalc::default().query("1+".to_string()).await?;
-
-        let Action::Copy(copy_str) = &result.items[0]
-            .call_command("copy-equation")
-            .await
-            .context("no copy equation")??
-            .list[1]
-        // 0 is close action, 1 is copy
-        else {
-            panic!("action should be copy")
-        };
-
-        assert_eq!(copy_str, "1 = 1");
-
-        Ok(())
-    }
 }

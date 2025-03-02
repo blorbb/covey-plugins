@@ -1,7 +1,7 @@
 use std::process::Stdio;
 
 use covey_plugin::{
-    Action, Input, List, ListItem, Plugin, Result, anyhow::Context, clone_async, rank,
+    Input, List, ListItem, Plugin, Result, anyhow::Context, clone_async, rank, spawn,
 };
 use tokio::{fs, process::Command};
 use tokio_stream::{StreamExt, wrappers::ReadDirStream};
@@ -48,12 +48,10 @@ impl Plugin for Zealdoc {
             .map(|docset| {
                 ListItem::new(&docset.lang)
                     .with_icon_name("zeal")
-                    .on_activate(clone_async!(lang = docset.lang, || Ok(Input::new(
-                        format!("{lang}:")
-                    ))))
-                    .on_complete(clone_async!(lang = docset.lang, || Ok(Input::new(
-                        format!("{lang}:")
-                    ))))
+                    .on_complete(clone_async!(lang = docset.lang, |menu| {
+                        menu.set_input(Input::new(format!("{lang}:")));
+                        Ok(())
+                    }))
             })
             .collect();
 
@@ -86,18 +84,15 @@ impl Plugin for Zealdoc {
                 .map(|line| {
                     ListItem::new(line)
                         .with_icon_name("zeal")
-                        .on_activate(clone_async!(lang = docset.lang, stripped_query, || {
-                            Ok([
-                                Action::Close,
-                                Action::RunCommand(
-                                    "zeal".to_string(),
-                                    vec![format!("{lang}:{stripped_query}")],
-                                ),
-                            ])
+                        .on_activate(clone_async!(lang = docset.lang, stripped_query, |menu| {
+                            menu.close();
+                            spawn::program("zeal", [format!("{lang}:{stripped_query}")])?;
+                            Ok(())
                         }))
-                        .on_complete(clone_async!(lang = docset.lang, line, || Ok(Input::new(
-                            format!("{lang}:{line}")
-                        ))))
+                        .on_complete(clone_async!(lang = docset.lang, line, |menu| {
+                            menu.set_input(Input::new(format!("{lang}:{line}")));
+                            Ok(())
+                        }))
                 })
                 .collect();
             Ok(List::new(items))

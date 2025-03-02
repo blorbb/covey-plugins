@@ -1,4 +1,4 @@
-use covey_plugin::{Action, Input, List, ListItem, Plugin, Result, clone_async, rank};
+use covey_plugin::{Input, List, ListItem, Plugin, Result, clone_async, rank};
 
 // mapping from
 // https://github.com/joom/latex-unicoder.vim/blob/master/autoload/unicoder.vim
@@ -23,10 +23,15 @@ impl Plugin for Latex {
             .map(|(latex, unicode)| {
                 ListItem::new(latex)
                     .with_icon_text(unicode)
-                    .on_activate(clone_async!(unicode, || {
-                        Ok([Action::close(), Action::copy(unicode)])
+                    .on_activate(clone_async!(unicode, |menu| {
+                        menu.close();
+                        menu.copy(unicode);
+                        Ok(())
                     }))
-                    .on_complete(clone_async!(|| Ok(Input::new(unicode))))
+                    .on_complete(clone_async!(|menu| {
+                        menu.set_input(Input::new(unicode));
+                        Ok(())
+                    }))
             })
             .collect();
 
