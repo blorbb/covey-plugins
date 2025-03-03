@@ -37,7 +37,7 @@ fn process_entry(entry: DesktopEntry, locales: &[impl AsRef<str>]) -> Option<Lis
             .with_icon(entry.icon().map(|name| Icon::Name(name.to_string())))
             .on_activate(clone_async!(class, exec, |menu| {
                 menu.close();
-                if class.is_empty() || activate_kdotool(&class).await.is_ok() {
+                if class.is_empty() || activate_kdotool(&class).await.is_err() {
                     spawn::script(exec)?;
                 }
 
