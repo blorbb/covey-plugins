@@ -6,9 +6,9 @@ authors = ["blorbb"]
 [[commands]]
 id = "activate"
 title = "Copy"
-default-hotkeys = [{ key = "enter" }]
+default-hotkeys = ["Enter"]
 
 [[commands]]
 id = "complete"
 title = "Complete"
-default-hotkeys = [{ key = "enter" }, { key = "tab" }]
+default-hotkeys = ["Enter", "Tab"]

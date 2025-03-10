@@ -6,28 +6,28 @@ authors = ["blorbb"]
 [[commands]]
 id = "copy"
 title = "Copy result"
-default-hotkeys = [{ key = "enter" }]
+default-hotkeys = ["Enter"]
 
 [[commands]]
 id = "copy-equation"
 title = "Copy equation"
-default-hotkeys = [{ key = "enter", alt = true }]
+default-hotkeys = ["Alt+Enter"]
 
 [[commands]]
 id = "complete"
 title = "Insert result"
 description = "Replace the current input with the result"
-default-hotkeys = [{ key = "tab" }]
+default-hotkeys = ["Tab"]
 
 # commands for history items
 [[commands]]
 id = "append-history-result"
 title = "Append history result"
 description = "Add the result of the selected history item to the end of the current equation"
-default-hotkeys = [{ key = "enter" }, { key = "tab" }]
+default-hotkeys = ["Enter", "Tab"]
 
 [[commands]]
 id = "insert-history-query"
 title = "Insert history query"
 description = "Set the input to the query of the selected history item"
-default-hotkeys = [{ key = "enter", alt = true }]
+default-hotkeys = ["Enter"]
