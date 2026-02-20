@@ -9,6 +9,7 @@ members = [
     "latex",
     "text-edit",
     "system-power",
+    "find",
 ]
 resolver = "2"
 

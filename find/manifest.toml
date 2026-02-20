@@ -1,0 +1,4 @@
+name = "Find files"
+repository = "https://github.com/blorbb/covey-plugins"
+authors = ["blorbb"]
+default-prefix = "~"
