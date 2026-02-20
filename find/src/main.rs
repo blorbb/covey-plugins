@@ -1,7 +1,7 @@
 use rayon::prelude::*;
 use std::{
     cmp::Reverse,
-    path::PathBuf,
+    path::{Path, PathBuf},
     sync::{Arc, RwLock, mpsc},
     time::Instant,
 };
@@ -120,7 +120,12 @@ impl Find {
         }
     }
 
-    fn paths_to_list(&self, search_dir: &str, mut ranking: Vec<(&String, u32)>) -> List {
+    fn paths_to_list(
+        &self,
+        search_dir: &str,
+        mut ranking: Vec<(&String, u32)>,
+        pattern: &str,
+    ) -> List {
         ranking.par_iter_mut().for_each(|(path, score)| {
             if path.ends_with('/') {
                 *score += 1;
@@ -143,17 +148,29 @@ impl Find {
                     // navigates to the directory of the selected item
                     .on_complete(clone_async!(search_dir, path, |menu| {
                         let path_without_file = path.trim_end_matches(|c| c != '/');
-                        let new_path = if search_dir.is_empty() || search_dir == "/" {
-                            format!("/{search_dir}{path_without_file}")
-                        } else {
-                            format!("/{search_dir}/{path_without_file}")
-                        };
+                        let new_path = format!("/{search_dir}{path_without_file}");
                         menu.set_input(Input::new(new_path));
                         Ok(())
                     }))
                     .on_activate(clone_async!(absolute_search_dir, path, |menu| {
                         menu.close();
                         spawn::program("xdg-open", &[absolute_search_dir.join(path)])?;
+                        Ok(())
+                    }))
+                    // TODO: need list-wide shortcuts. this doesn't work
+                    // if there are no output list items!
+                    .on_parent_dir(clone_async!(search_dir, pattern, |menu| {
+                        let parent_dir = Path::new(&search_dir)
+                            .parent()
+                            .unwrap_or(Path::new(&search_dir))
+                            .to_str()
+                            .unwrap();
+                        let with_suffix = if parent_dir.is_empty() || parent_dir == "/" {
+                            format!("{parent_dir}")
+                        } else {
+                            format!("{parent_dir}/")
+                        };
+                        menu.set_input(Input::new(format!("/{with_suffix} {pattern}",)));
                         Ok(())
                     }))
             })
@@ -166,7 +183,7 @@ impl Find {
         dbg!(&search_dir, &pattern);
         let to_search = self.get_dir_contents(self.query_dir_to_path(search_dir), recursive)?;
 
-        let pattern = nucleo_matcher::pattern::Pattern::parse(
+        let nucleo_pattern = nucleo_matcher::pattern::Pattern::parse(
             pattern,
             CaseMatching::Smart,
             Normalization::Smart,
@@ -174,11 +191,11 @@ impl Find {
         let mut matcher = Matcher::new(nucleo_matcher::Config::DEFAULT.match_paths());
 
         let start = Instant::now();
-        let ranked = parallel_match(pattern, &mut matcher, &to_search);
+        let ranked = parallel_match(nucleo_pattern, &mut matcher, &to_search);
         eprintln!("RANKING took {:?}", start.elapsed());
 
         let start = Instant::now();
-        let list = self.paths_to_list(search_dir, ranked);
+        let list = self.paths_to_list(search_dir, ranked, pattern);
         eprintln!("RESORTING took {:?}", start.elapsed());
 
         Ok(list)
@@ -219,49 +236,44 @@ impl PluginBlocking for Find {
     }
 
     fn query(&self, mut query: String) -> Result<List> {
-        // Normalise the query to /some/thing for relative to home dir,
-        // or //some/thing for relative to root dir.
-        if !query.starts_with('/') {
-            query.insert(0, '/');
-        }
+        // Normalise the query to "some/thing/" for relative to home dir,
+        // or "/some/thing/" for relative to root dir, or "" if empty.
+        if query.starts_with('/') {
+            query.remove(0);
+        };
 
-        match query.split_once("/ ") {
-            // Just show what's in the directory currently queried.
-            None => {
-                // ~/x    -> ""     "x"
-                // ~//x   -> "/"    "x"
-                // ~/x/a  -> "/x"   "a"   (want search dir to be "x")
-                // ~//x/a -> "//x"  "a"   (want search dir to be "/x")
-                let (search_dir, pattern) = query.rsplit_once('/').unwrap_or(("", &query));
+        if let Some((search_dir, pattern)) = query.split_once("/ ") {
+            let search_dir = format!("{search_dir}/");
+            Ok(self
+                .find_in_children(&search_dir, pattern, true)
+                .inspect_err(|e| eprintln!("{e:#}"))
+                .unwrap_or(List::new(vec![])))
+        } else if let Some(pattern) = query.strip_prefix(' ') {
+            Ok(self
+                .find_in_children("", pattern, true)
+                .inspect_err(|e| eprintln!("{e:#}"))
+                .unwrap_or(List::new(vec![])))
+        } else {
+            // x    -> ""    "x"   (want search dir to be "")
+            // x/   -> "x"   ""    (want search dir to be "x/")
+            // /x   -> ""    "x"   (want search dir to be "/")
+            // x/a  -> "x"   "a"   (want search dir to be "x/")
+            // /x/a -> "/x"  "a"   (want search dir to be "/x/")
+            let (search_dir, pattern) = query.rsplit_once('/').unwrap_or(("", &query));
 
-                let search_dir = search_dir.trim_start_matches('/');
-                let search_dir = if query.starts_with("//") {
-                    format!("/{search_dir}")
-                } else {
-                    search_dir.to_owned()
-                };
-                // search dir should start with "/" IFF we query from the root.
-                // otherwise, it should not start with "/" and we query from home dir.
+            let search_dir = if query.contains('/') {
+                format!("{search_dir}/")
+            } else {
+                format!("{search_dir}")
+            };
+            // search dir should start with "/" IFF we query from the root.
+            // otherwise, it should not start with "/" and we query from home dir.
+            // it will also always end in /
 
-                Ok(self
-                    .find_in_children(&search_dir, pattern, false)
-                    .inspect_err(|e| eprintln!("{e:#}"))
-                    .unwrap_or(List::new(vec![])))
-            }
-            // Recursive search
-            Some((search_dir, pattern)) => {
-                let search_dir = search_dir.trim_start_matches('/');
-                let search_dir = if query.starts_with("//") {
-                    format!("/{search_dir}")
-                } else {
-                    search_dir.to_owned()
-                };
-
-                Ok(self
-                    .find_in_children(&search_dir, pattern, true)
-                    .inspect_err(|e| eprintln!("{e:#}"))
-                    .unwrap_or(List::new(vec![])))
-            }
+            Ok(self
+                .find_in_children(&search_dir, pattern, false)
+                .inspect_err(|e| eprintln!("{e:#}"))
+                .unwrap_or(List::new(vec![])))
         }
     }
 }

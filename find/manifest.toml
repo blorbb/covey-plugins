@@ -2,3 +2,21 @@ name = "Find files"
 repository = "https://github.com/blorbb/covey-plugins"
 authors = ["blorbb"]
 default-prefix = "~"
+
+
+[[commands]]
+id = "activate"
+title = "Open"
+description = "Open with xdg-open"
+
+[[commands]]
+id = "complete"
+title = "Search in dir"
+description = "Search in the directory of the focused item"
+default-hotkeys = ["Tab"]
+
+[[commands]]
+id = "parent-dir"
+title = "Search in parent"
+description = "Search in parent of current search directory"
+default-hotkeys = ["Ctrl+H"]
