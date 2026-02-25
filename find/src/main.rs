@@ -1,4 +1,3 @@
-use rayon::prelude::*;
 use std::{
     cmp::Reverse,
     path::{Path, PathBuf},
@@ -14,6 +13,7 @@ use nucleo_matcher::{
     Matcher, Utf32String,
     pattern::{CaseMatching, Normalization, Pattern},
 };
+use rayon::prelude::*;
 
 covey_plugin::include_manifest!();
 
