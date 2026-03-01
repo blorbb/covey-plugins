@@ -127,12 +127,14 @@ impl Find {
         pattern: &str,
     ) -> List {
         ranking.par_iter_mut().for_each(|(path, score)| {
-            if path.ends_with('/') {
-                *score += 1;
-                *score = ((*score as f64) * 1.1) as u32;
-            }
             let slashes = path.chars().filter(|c| *c == '/').count();
             *score += 5u32.saturating_sub(slashes as u32) * 10;
+            // this is enough to make folders weighted slightly higher than files with an
+            // empty query
+            if path.ends_with('/') {
+                *score += 1;
+                *score = ((*score as f64) * 1.25) as u32;
+            }
         });
 
         // By reverse score, then alphabetically
