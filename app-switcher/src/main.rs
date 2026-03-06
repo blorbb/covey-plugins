@@ -1,6 +1,10 @@
 use std::{process::Stdio, sync::LazyLock};
 
-use covey_plugin::{Icon, List, ListItem, Plugin, Result, anyhow::bail, clone_async, rank, spawn};
+use covey_plugin::{
+    Icon, List, ListItem, Plugin, Result,
+    anyhow::{Context, bail},
+    clone_async, rank, spawn,
+};
 use freedesktop_desktop_entry::{self as desktop, DesktopEntry};
 
 covey_plugin::include_manifest!();
@@ -27,7 +31,7 @@ fn process_entry(entry: DesktopEntry, locales: &[impl AsRef<str>]) -> Option<Lis
 
     // https://specifications.freedesktop.org/desktop-entry-spec/latest/exec-variables.html
     // lots of allocations but its a tiny string anyways, doesn't matter
-    let exec = entry.parse_exec().ok()?.join(" ");
+    let exec = entry.parse_exec().ok()?;
 
     let class = entry.startup_wm_class().unwrap_or(entry.id()).to_string();
 
@@ -38,7 +42,8 @@ fn process_entry(entry: DesktopEntry, locales: &[impl AsRef<str>]) -> Option<Lis
             .on_activate(clone_async!(class, exec, |menu| {
                 menu.close();
                 if class.is_empty() || activate_kdotool(&class).await.is_err() {
-                    spawn::script(exec)?;
+                    let (program, args) = exec.split_first().context("failed to parse app Exec")?;
+                    spawn::program(program, args)?;
                 }
 
                 Ok(())
