@@ -3,7 +3,7 @@ use std::{
     sync::{Arc, RwLock},
 };
 
-use covey_plugin::{Input, List, ListItem, Plugin, Result, clone_async};
+use covey_plugin::{Input, List, ListItem, Plugin, Result, clone_async, spawn};
 use serde::{Deserialize, Serialize};
 use tokio::process::Command;
 
@@ -26,7 +26,7 @@ impl Plugin for Qalc {
 
     async fn new(_: ()) -> Result<Self> {
         // update exchange rates
-        Command::new("qalc").args(["--exrates", "--", ""]).spawn()?;
+        spawn::command("qalc", ["--exrates", "--", ""])?;
 
         let history = try_read_history().await.unwrap_or_default();
         Ok(Self {
@@ -128,13 +128,18 @@ async fn try_read_history() -> std::io::Result<Vec<HistoryEntry>> {
 }
 
 async fn get_qalc_output(query: &str, extra_args: &[&str]) -> Result<String> {
+    // warnings start with "warning:".
+    // errors start with "error:".
+    // also will have non-zero exit code if there are errors, including in --terse
+    // mode which doesn't show any "error:" lines.
     let output = Command::new("qalc")
-        .args(["-defaults", "-set", "upxrates 0"])
+        .args(["--defaults", "--color=0", "-set", "upxrates 0"])
         .args(extra_args)
         .arg("--")
         .arg(query)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
+        .stderr(Stdio::null()) // nothing is put into stderr anyways
         .spawn()?
         .wait_with_output()
         .await?;

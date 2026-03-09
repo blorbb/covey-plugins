@@ -44,7 +44,7 @@ impl Plugin for CodeProjects {
                     .on_activate(clone_async!(path = value.root_path, |menu| {
                         // https://github.com/brpaz/ulauncher-vscode-projects/blob/master/vscode_projects/listeners/item_enter.py
                         menu.close();
-                        spawn::program("code", [path])?;
+                        spawn::command("code", [path])?;
                         Ok(())
                     }))
             })

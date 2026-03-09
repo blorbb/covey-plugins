@@ -156,7 +156,7 @@ impl Find {
                     }))
                     .on_activate(clone_async!(absolute_search_dir, path, |menu| {
                         menu.close();
-                        spawn::program("xdg-open", &[absolute_search_dir.join(path)])?;
+                        spawn::command("xdg-open", &[absolute_search_dir.join(path)])?;
                         Ok(())
                     }))
                     // TODO: need list-wide shortcuts. this doesn't work

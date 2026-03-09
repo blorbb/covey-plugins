@@ -43,7 +43,7 @@ fn process_entry(entry: DesktopEntry, locales: &[impl AsRef<str>]) -> Option<Lis
                 menu.close();
                 if class.is_empty() || activate_kdotool(&class).await.is_err() {
                     let (program, args) = exec.split_first().context("failed to parse app Exec")?;
-                    spawn::program(program, args)?;
+                    spawn::command(program, args)?;
                 }
 
                 Ok(())
