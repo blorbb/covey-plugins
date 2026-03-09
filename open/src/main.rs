@@ -53,7 +53,7 @@ impl Plugin for Open {
                 .with_description(replaced_url.clone())
                 .on_activate(clone_async!(replaced_url, |menu| {
                     menu.close();
-                    spawn::program("xdg-open", [replaced_url])?;
+                    spawn::command("xdg-open", [replaced_url])?;
                     Ok(())
                 }));
 

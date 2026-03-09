@@ -86,7 +86,7 @@ impl Plugin for Zealdoc {
                         .with_icon_name("zeal")
                         .on_activate(clone_async!(lang = docset.lang, stripped_query, |menu| {
                             menu.close();
-                            spawn::program("zeal", [format!("{lang}:{stripped_query}")])?;
+                            spawn::command("zeal", [format!("{lang}:{stripped_query}")])?;
                             Ok(())
                         }))
                         .on_complete(clone_async!(lang = docset.lang, line, |menu| {
