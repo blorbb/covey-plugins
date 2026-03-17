@@ -23,16 +23,16 @@ impl Plugin for TextEdit {
             None => List::new(
                 rank::rank(
                     &query,
-                    vec![
-                        &ListItem::new("case").on_complete(async |menu| {
+                    &[
+                        ListItem::new("case").on_complete(async |menu| {
                             menu.set_input(Input::new("case "));
                             Ok(())
                         }),
-                        &ListItem::new("encode").on_complete(async |menu| {
+                        ListItem::new("encode").on_complete(async |menu| {
                             menu.set_input(Input::new("encode "));
                             Ok(())
                         }),
-                        &ListItem::new("decode").on_complete(async |menu| {
+                        ListItem::new("decode").on_complete(async |menu| {
                             menu.set_input(Input::new("decode "));
                             Ok(())
                         }),
