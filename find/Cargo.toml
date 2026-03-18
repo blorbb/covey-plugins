@@ -7,5 +7,4 @@ edition.workspace = true
 covey-plugin.workspace = true
 ignore = "0.4"
 dirs = "6"
-nucleo-matcher = "0.3"
 rayon = "1"

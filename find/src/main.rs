@@ -1,18 +1,17 @@
 use std::{
-    cmp::Reverse,
     path::{Path, PathBuf},
     sync::{Arc, RwLock, mpsc},
-    time::Instant,
+    time::{Instant, SystemTime},
 };
 
 use covey_plugin::{
-    Input, List, ListItem, PluginBlocking, Result, anyhow::Context, clone_async, spawn,
+    Input, List, ListItem, PluginBlocking, Result,
+    anyhow::Context,
+    clone_async,
+    rank::{self, Weights},
+    spawn,
 };
 use ignore::WalkState;
-use nucleo_matcher::{
-    Matcher, Utf32String,
-    pattern::{CaseMatching, Normalization, Pattern},
-};
 use rayon::prelude::*;
 
 covey_plugin::include_manifest!();
@@ -120,33 +119,21 @@ impl Find {
         }
     }
 
-    fn paths_to_list(
-        &self,
-        search_dir: &str,
-        mut ranking: Vec<(&String, u32)>,
-        pattern: &str,
-    ) -> List {
-        ranking.par_iter_mut().for_each(|(path, score)| {
-            let slashes = path.chars().filter(|c| *c == '/').count();
-            *score += 5u32.saturating_sub(slashes as u32) * 10;
-            // this is enough to make folders weighted slightly higher than files with an
-            // empty query
-            if path.ends_with('/') {
-                *score += 1;
-                *score = ((*score as f64) * 1.25) as u32;
-            }
-        });
-
-        // By reverse score, then alphabetically
-        ranking.sort_by_key(|(path, score)| (Reverse(*score), *path));
+    fn find_in_children(&self, search_dir: &str, pattern: &str, recursive: bool) -> Result<List> {
+        let to_search = self.get_dir_contents(self.query_dir_to_path(search_dir), recursive)?;
 
         let absolute_search_dir = self.query_dir_to_path(search_dir);
 
-        let list = ranking
+        let weights = Weights::with_history().frecency(20.0);
+        let visits = rank::Visits::from_file();
+        let now = SystemTime::now();
+
+        let start = Instant::now();
+        let mut items: Vec<_> = to_search
             .into_par_iter()
-            .take(100)
-            .map(|(path, score)| {
-                ListItem::new(format!("{path}    ({score})"))
+            .map(|path| {
+                ListItem::new(path)
+                    .with_usage_id(absolute_search_dir.join(path).to_string_lossy())
                     // navigates to the directory of the selected item
                     .on_complete(clone_async!(search_dir, path, |menu| {
                         let path_without_file = path.trim_end_matches(|c| c != '/');
@@ -176,55 +163,40 @@ impl Find {
                         Ok(())
                     }))
             })
+            .map(|item| {
+                let path = &item.title;
+                let mut accuracy = item.accuracy(pattern, weights);
+                let slashes = path.chars().filter(|c| *c == '/').count();
+                accuracy += (5u32.saturating_sub(slashes as u32) * 10) as f32;
+                // this is enough to make folders weighted slightly higher than files with an
+                // empty query
+                if path.ends_with('/') {
+                    accuracy += 1.0;
+                    accuracy *= 1.25;
+                }
+
+                let score = item
+                    .frecency(&visits, now)
+                    .combine_with_accuracy(accuracy, weights);
+                (item, score)
+            })
+            .filter(|(_, score)| pattern.is_empty() || *score > 1.0)
             .collect();
-
-        List::new(list)
-    }
-
-    fn find_in_children(&self, search_dir: &str, pattern: &str, recursive: bool) -> Result<List> {
-        dbg!(&search_dir, &pattern);
-        let to_search = self.get_dir_contents(self.query_dir_to_path(search_dir), recursive)?;
-
-        let nucleo_pattern = nucleo_matcher::pattern::Pattern::parse(
-            pattern,
-            CaseMatching::Smart,
-            Normalization::Smart,
-        );
-        let mut matcher = Matcher::new(nucleo_matcher::Config::DEFAULT.match_paths());
+        eprintln!("SCORING took {:?}", start.elapsed());
 
         let start = Instant::now();
-        let ranked = parallel_match(nucleo_pattern, &mut matcher, &to_search);
-        eprintln!("RANKING took {:?}", start.elapsed());
+        // By reverse score, then alphabetically
+        items.par_sort_unstable_by(|(item1, score1), (item2, score2)| {
+            score2
+                .total_cmp(score1)
+                .then_with(|| item1.title.cmp(&item2.title))
+        });
+        eprintln!("SORTING took {:?}", start.elapsed());
 
-        let start = Instant::now();
-        let list = self.paths_to_list(search_dir, ranked, pattern);
-        eprintln!("RESORTING took {:?}", start.elapsed());
-
-        Ok(list)
+        Ok(List::new(
+            items.into_iter().take(100).map(|(item, _)| item).collect(),
+        ))
     }
-}
-
-fn parallel_match<'a>(
-    pattern: Pattern,
-    matcher: &mut Matcher,
-    items: &'a [String],
-) -> Vec<(&'a String, u32)> {
-    if pattern.atoms.is_empty() {
-        return items.into_iter().map(|item| (item, 0)).collect();
-    }
-    // TODO: reuse a buffer instead of using Utf32String.
-    let items: Vec<_> = items
-        .into_par_iter()
-        .filter_map(|item| {
-            pattern
-                .score(
-                    Utf32String::from(item.as_ref()).slice(..),
-                    &mut matcher.clone(),
-                )
-                .map(|score| (item, score))
-        })
-        .collect();
-    items
 }
 
 impl PluginBlocking for Find {
