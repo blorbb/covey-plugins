@@ -1,4 +1,4 @@
-plugin-dir := data_dir()/"covey"/"plugins"
+plugin-dir := data_dir() / "covey" / "plugins"
 
 # installs all plugins
 install-all mode='release':
@@ -9,7 +9,7 @@ install-all mode='release':
         name="${directory%*/}"  # remove the trailing "/"
         # directory does not contain "target"
         if [[ ! "$name" =~ "target" ]] ; then
-            just install "$name" "{{mode}}"
+            just install "$name" "{{ mode }}"
         fi
     done
 
@@ -17,13 +17,13 @@ install-all mode='release':
 install plugin mode='release':
     #!/usr/bin/env bash
     set -euo pipefail
-    echo "installing {{plugin}} to {{plugin-dir}}/{{plugin}}"
-    if [[ "{{mode}}" = "debug" ]]; then
-        cargo build -p '{{plugin}}' --artifact-dir "{{plugin-dir}}/{{plugin}}" -Z unstable-options
-    else if [[ "{{mode}}" = "release" ]]; then
-        cargo build -p '{{plugin}}' --release --artifact-dir "{{plugin-dir}}/{{plugin}}" -Z unstable-options
+    echo "installing {{ plugin }} to {{ plugin-dir }}/{{ plugin }}"
+    if [[ "{{ mode }}" = "debug" ]]; then
+        RUSTFLAGS="-C target-cpu=native" cargo build -p '{{ plugin }}' --artifact-dir "{{ plugin-dir }}/{{ plugin }}" -Z unstable-options
+    else if [[ "{{ mode }}" = "release" ]]; then
+        RUSTFLAGS="-C target-cpu=native" cargo build -p '{{ plugin }}' --release --artifact-dir "{{ plugin-dir }}/{{ plugin }}" -Z unstable-options
     else
         echo "mode must be release or debug"
         exit 1
     fi fi
-    cp "{{plugin}}/manifest.toml" "{{plugin-dir}}/{{plugin}}/manifest.toml"
+    cp "{{ plugin }}/manifest.toml" "{{ plugin-dir }}/{{ plugin }}/manifest.toml"
