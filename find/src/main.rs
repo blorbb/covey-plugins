@@ -5,7 +5,7 @@ use std::{
 };
 
 use covey_plugin::{
-    Input, List, ListItem, PluginBlocking, Result,
+    Input, List, ListItem, Plugin, Result,
     anyhow::Context,
     clone_async,
     rank::{self, Weights},
@@ -199,7 +199,7 @@ impl Find {
     }
 }
 
-impl PluginBlocking for Find {
+impl Plugin for Find {
     type Config = Config;
 
     async fn new(_: Self::Config) -> Result<Self> {
@@ -209,7 +209,7 @@ impl PluginBlocking for Find {
         })
     }
 
-    fn query(&self, mut query: String) -> Result<List> {
+    async fn query(&self, mut query: String) -> Result<List> {
         // Normalise the query to "some/thing/" for relative to home dir,
         // or "/some/thing/" for relative to root dir, or "" if empty.
         if query.starts_with('/') {
