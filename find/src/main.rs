@@ -155,7 +155,7 @@ impl Find {
                             .to_str()
                             .unwrap();
                         let with_suffix = if parent_dir.is_empty() || parent_dir == "/" {
-                            format!("{parent_dir}")
+                            parent_dir.to_owned()
                         } else {
                             format!("{parent_dir}/")
                         };
@@ -238,7 +238,7 @@ impl Plugin for Find {
             let search_dir = if query.contains('/') {
                 format!("{search_dir}/")
             } else {
-                format!("{search_dir}")
+                search_dir.to_owned()
             };
             // search dir should start with "/" IFF we query from the root.
             // otherwise, it should not start with "/" and we query from home dir.
