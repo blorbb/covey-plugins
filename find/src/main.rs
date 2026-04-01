@@ -124,7 +124,7 @@ impl Find {
 
         let absolute_search_dir = self.query_dir_to_path(search_dir);
 
-        let weights = Weights::with_history().frecency(20.0);
+        let weights = Weights::with_history().frecency(4.0);
         let visits = rank::Visits::from_file();
         let now = SystemTime::now();
 
@@ -176,8 +176,8 @@ impl Find {
                 }
 
                 let score = item
-                    .frecency(&visits, now)
-                    .combine_with_accuracy(accuracy, weights);
+                    .frecency(&visits, now, weights)
+                    .combine_with_accuracy(accuracy);
                 (item, score)
             })
             .filter(|(_, score)| pattern.is_empty() || *score > 1.0)
