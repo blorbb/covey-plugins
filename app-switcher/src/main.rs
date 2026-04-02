@@ -2,7 +2,7 @@ use std::{process::Stdio, sync::LazyLock};
 
 use covey_plugin::{
     Icon, List, ListItem, Plugin, Result,
-    anyhow::{Context, bail},
+    anyhow::{Context, anyhow, bail},
     clone_async, rank, spawn,
 };
 use freedesktop_desktop_entry::{self as desktop, DesktopEntry};
@@ -29,10 +29,10 @@ fn process_entry(entry: DesktopEntry, locales: &[impl AsRef<str>]) -> Option<Lis
         return None;
     }
 
-    // https://specifications.freedesktop.org/desktop-entry-spec/latest/exec-variables.html
-    // lots of allocations but its a tiny string anyways, doesn't matter
-    let exec = entry.parse_exec().ok()?;
-
+    // entry.parse_exec() doesn't parse correctly (quoted args with spaces inside).
+    let exec = parse_exec(&entry, locales)
+        .context("failed to parse app Exec")
+        .map_err(|e| format!("{e:#}"));
     let class = entry.startup_wm_class().unwrap_or(entry.id()).to_string();
 
     Some(
@@ -42,7 +42,8 @@ fn process_entry(entry: DesktopEntry, locales: &[impl AsRef<str>]) -> Option<Lis
             .on_activate(clone_async!(class, exec, |menu| {
                 menu.close();
                 if class.is_empty() || activate_kdotool(&class).await.is_err() {
-                    let (program, args) = exec.split_first().context("failed to parse app Exec")?;
+                    let exec = exec.map_err(|s| anyhow!(s))?;
+                    let (program, args) = exec.split_first().context("missing Exec command")?;
                     spawn::command(program, args)?;
                 }
 
@@ -101,6 +102,61 @@ async fn activate_kdotool(class: &str) -> Result<()> {
     } else {
         bail!("kdotool failed to activate: {:?}", exit)
     }
+}
+
+/// Parses the Exec entry mostly according to
+/// https://specifications.freedesktop.org/desktop-entry/latest/exec-variables.html
+fn parse_exec(entry: &DesktopEntry, locales: &[impl AsRef<str>]) -> Result<Vec<String>> {
+    let exec = shlex::split(entry.exec().context("missing Exec key")?)
+        .context("failed to parse Exec key")?;
+
+    let mut parsed_exec = Vec::new();
+
+    for arg in exec {
+        if !arg.contains('%') {
+            parsed_exec.push(arg);
+            continue;
+        }
+
+        let mut parsed_arg = String::new();
+        let mut after_percent = false;
+        for char in arg.chars() {
+            if after_percent {
+                match char {
+                    // %% -> %
+                    '%' => parsed_arg.push('%'),
+                    // ignore extra files or uris
+                    'f' | 'F' | 'u' | 'U' => {}
+                    // ignore deprecated
+                    'd' | 'D' | 'n' | 'N' | 'v' | 'm' => {}
+                    // icon -- I don't understand what the spec means so ignoring
+                    'i' => {}
+                    // translated name of the application
+                    'c' => parsed_arg.push_str(&entry.name(locales).context("missing Name key")?),
+                    // location of the desktop file
+                    'k' => parsed_arg.push_str(
+                        entry
+                            .path
+                            .to_str()
+                            .context("desktop file path is not UTF-8")?,
+                    ),
+                    _ => bail!("unknown field code %{char}"),
+                }
+            } else {
+                match char {
+                    '%' => after_percent = true,
+                    _ => parsed_arg.push(char),
+                }
+            }
+        }
+
+        // for something like `firefox %f`, should become `firefox` not `firefox ''`.
+        if !parsed_arg.is_empty() {
+            parsed_exec.push(parsed_arg);
+        }
+    }
+
+    Ok(parsed_exec)
 }
 
 const USELESS_CATEGORIES: [&str; 7] = [

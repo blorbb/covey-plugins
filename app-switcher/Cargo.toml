@@ -8,3 +8,4 @@ metadata.workspace = true
 freedesktop-desktop-entry = "0.8.1"
 covey-plugin.workspace = true
 tokio = { version = "1.41.1", features = ["fs", "process", "sync"] }
+shlex = "1"
