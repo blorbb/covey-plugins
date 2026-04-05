@@ -133,7 +133,7 @@ impl Find {
             .into_par_iter()
             .map(|path| {
                 ListItem::new(path)
-                    .with_usage_id(absolute_search_dir.join(path).to_string_lossy())
+                    .with_visit_id(absolute_search_dir.join(path).to_string_lossy())
                     // navigates to the directory of the selected item
                     .on_complete(clone_async!(search_dir, path, |menu| {
                         let path_without_file = path.trim_end_matches(|c| c != '/');
@@ -144,22 +144,6 @@ impl Find {
                     .on_activate(clone_async!(absolute_search_dir, path, |menu| {
                         menu.close();
                         spawn::command("xdg-open", &[absolute_search_dir.join(path)])?;
-                        Ok(())
-                    }))
-                    // TODO: need list-wide shortcuts. this doesn't work
-                    // if there are no output list items!
-                    .on_parent_dir(clone_async!(search_dir, pattern, |menu| {
-                        let parent_dir = Path::new(&search_dir)
-                            .parent()
-                            .unwrap_or(Path::new(&search_dir))
-                            .to_str()
-                            .unwrap();
-                        let with_suffix = if parent_dir.is_empty() || parent_dir == "/" {
-                            parent_dir.to_owned()
-                        } else {
-                            format!("{parent_dir}/")
-                        };
-                        menu.set_input(Input::new(format!("/{with_suffix} {pattern}",)));
                         Ok(())
                     }))
             })
@@ -193,9 +177,24 @@ impl Find {
         });
         eprintln!("SORTING took {:?}", start.elapsed());
 
-        Ok(List::new(
-            items.into_iter().take(100).map(|(item, _)| item).collect(),
-        ))
+        Ok(
+            List::new(items.into_iter().take(100).map(|(item, _)| item).collect()).on_parent_dir(
+                clone_async!(search_dir, pattern, |menu| {
+                    let parent_dir = Path::new(&search_dir)
+                        .parent()
+                        .unwrap_or(Path::new(&search_dir))
+                        .to_str()
+                        .unwrap();
+                    let with_suffix = if parent_dir.is_empty() || parent_dir == "/" {
+                        parent_dir.to_owned()
+                    } else {
+                        format!("{parent_dir}/")
+                    };
+                    menu.set_input(Input::new(format!("/{with_suffix} {pattern}",)));
+                    Ok(())
+                }),
+            ),
+        )
     }
 }
 
@@ -218,15 +217,9 @@ impl Plugin for Find {
 
         if let Some((search_dir, pattern)) = query.split_once("/ ") {
             let search_dir = format!("{search_dir}/");
-            Ok(self
-                .find_in_children(&search_dir, pattern, true)
-                .inspect_err(|e| eprintln!("{e:#}"))
-                .unwrap_or(List::new(vec![])))
+            Ok(self.find_in_children(&search_dir, pattern, true)?)
         } else if let Some(pattern) = query.strip_prefix(' ') {
-            Ok(self
-                .find_in_children("", pattern, true)
-                .inspect_err(|e| eprintln!("{e:#}"))
-                .unwrap_or(List::new(vec![])))
+            Ok(self.find_in_children("", pattern, true)?)
         } else {
             // x    -> ""    "x"   (want search dir to be "")
             // x/   -> "x"   ""    (want search dir to be "x/")
@@ -244,10 +237,7 @@ impl Plugin for Find {
             // otherwise, it should not start with "/" and we query from home dir.
             // it will also always end in /
 
-            Ok(self
-                .find_in_children(&search_dir, pattern, false)
-                .inspect_err(|e| eprintln!("{e:#}"))
-                .unwrap_or(List::new(vec![])))
+            Ok(self.find_in_children(&search_dir, pattern, false)?)
         }
     }
 }
