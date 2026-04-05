@@ -7,7 +7,7 @@ use covey_plugin::{
 
 covey_plugin::include_manifest!();
 
-fn run_then_close(f: impl Fn() -> io::Result<()> + 'static) -> impl AsyncFn(Menu) -> Result<()> {
+fn run_then_close(f: impl Fn() -> io::Result<()> + 'static) -> impl AsyncFn(&Menu) -> Result<()> {
     async move |menu| {
         menu.close();
         Ok(f()?)
