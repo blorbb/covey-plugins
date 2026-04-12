@@ -536,7 +536,6 @@ dependencies = [
  "covey-manifest-macros",
  "covey-proto",
  "dirs 6.0.0",
- "parking_lot",
  "serde",
  "serde_json",
  "skim",
