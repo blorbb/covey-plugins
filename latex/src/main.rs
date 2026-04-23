@@ -45,7 +45,7 @@ impl Plugin for Latex {
             .take(100)
             .collect();
 
-        Ok(List::new(ranking).as_grid())
+        Ok(List::new(ranking))
     }
 }
 

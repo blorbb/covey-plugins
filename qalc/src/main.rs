@@ -3,7 +3,7 @@ use std::{
     sync::{Arc, RwLock},
 };
 
-use covey_plugin::{Input, List, ListItem, Plugin, Result, clone_async, spawn};
+use covey_plugin::{Input, List, ListItem, ListSection, Plugin, Result, clone_async, spawn};
 use serde::{Deserialize, Serialize};
 use tokio::process::Command;
 
@@ -63,25 +63,32 @@ impl Plugin for Qalc {
 
         // add history items
         let history = self.history.read().unwrap();
-        let history = history.iter().rev().map(
-            |HistoryEntry {
-                 query: history_query,
-                 equation,
-                 result,
-             }| {
-                ListItem::new(equation)
-                    .on_append_history_result(clone_async!(query, result, |menu| {
-                        menu.set_input(Input::new(format!("{query}{result}")));
-                        Ok(())
-                    }))
-                    .on_insert_history_query(clone_async!(history_query, |menu| {
-                        menu.set_input(Input::new(history_query));
-                        Ok(())
-                    }))
-            },
-        );
+        let history = history
+            .iter()
+            .rev()
+            .map(
+                |HistoryEntry {
+                     query: history_query,
+                     equation,
+                     result,
+                 }| {
+                    ListItem::new(equation)
+                        .on_append_history_result(clone_async!(query, result, |menu| {
+                            menu.set_input(Input::new(format!("{query}{result}")));
+                            Ok(())
+                        }))
+                        .on_insert_history_query(clone_async!(history_query, |menu| {
+                            menu.set_input(Input::new(history_query));
+                            Ok(())
+                        }))
+                },
+            )
+            .collect();
 
-        Ok(List::new(std::iter::once(item).chain(history).collect()))
+        Ok(List::from_sections(vec![
+            ListSection::unnamed(vec![item]),
+            ListSection::new("History", history),
+        ]))
     }
 }
 
