@@ -3,6 +3,11 @@ description = "Calculate using qalc"
 repository = "https://github.com/blorbb/covey-plugins"
 authors = ["blorbb"]
 
+[[schema]]
+id = "qalc-path"
+title = "qalc binary path"
+type = { file-path = { default = "qalc" } }
+
 [[commands]]
 id = "copy"
 title = "Copy result"

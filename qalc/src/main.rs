@@ -1,4 +1,5 @@
 use std::{
+    path::PathBuf,
     process::Stdio,
     sync::{Arc, RwLock},
 };
@@ -19,25 +20,30 @@ struct HistoryEntry {
 #[derive(Clone, Default)]
 struct Qalc {
     history: Arc<RwLock<Vec<HistoryEntry>>>,
+    qalc_path: PathBuf,
 }
 
 impl Plugin for Qalc {
-    type Config = ();
+    type Config = Config;
 
-    async fn new(_: ()) -> Result<Self> {
+    async fn new(Config { qalc_path }: Config) -> Result<Self> {
+        let qalc_path = which::which(qalc_path)?;
+        eprintln!("resolved qalc path as {qalc_path:?}");
+
         // update exchange rates
-        spawn::command("qalc", ["--exrates", "--", ""])?;
+        spawn::command(&qalc_path, ["--exrates", "--", ""])?;
 
         let history = try_read_history().await.unwrap_or_default();
         Ok(Self {
             history: Arc::new(RwLock::new(history)),
+            qalc_path,
         })
     }
 
     async fn query(&self, query: String) -> Result<List> {
-        let output = get_qalc_output(&query, &[]).await?;
+        let output = self.get_qalc_output(&query, &[]).await?;
         let equation = output.lines().last().unwrap_or_default().to_string();
-        let terse = get_qalc_output(&query, &["-t"]).await?;
+        let terse = self.get_qalc_output(&query, &["-t"]).await?;
 
         let item = ListItem::new(output)
             .with_icon_name("qalculate")
@@ -121,6 +127,26 @@ impl Qalc {
             });
         }
     }
+
+    async fn get_qalc_output(&self, query: &str, extra_args: &[&str]) -> Result<String> {
+        // warnings start with "warning:".
+        // errors start with "error:".
+        // also will have non-zero exit code if there are errors, including in --terse
+        // mode which doesn't show any "error:" lines.
+        let output = Command::new(&self.qalc_path)
+            .args(["--defaults", "--color=0", "-set", "upxrates 0"])
+            .args(extra_args)
+            .arg("--")
+            .arg(query)
+            .stdin(Stdio::null())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null()) // nothing is put into stderr anyways
+            .spawn()?
+            .wait_with_output()
+            .await?;
+
+        Ok(String::from_utf8(output.stdout)?.trim().to_string())
+    }
 }
 
 fn history_file_path() -> std::path::PathBuf {
@@ -132,26 +158,6 @@ async fn try_read_history() -> std::io::Result<Vec<HistoryEntry>> {
         serde_json::from_slice(&tokio::fs::read(history_file_path()).await?)?;
 
     Ok(entries)
-}
-
-async fn get_qalc_output(query: &str, extra_args: &[&str]) -> Result<String> {
-    // warnings start with "warning:".
-    // errors start with "error:".
-    // also will have non-zero exit code if there are errors, including in --terse
-    // mode which doesn't show any "error:" lines.
-    let output = Command::new("qalc")
-        .args(["--defaults", "--color=0", "-set", "upxrates 0"])
-        .args(extra_args)
-        .arg("--")
-        .arg(query)
-        .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null()) // nothing is put into stderr anyways
-        .spawn()?
-        .wait_with_output()
-        .await?;
-
-    Ok(String::from_utf8(output.stdout)?.trim().to_string())
 }
 
 fn main() {
