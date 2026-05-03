@@ -6,7 +6,8 @@ authors = ["blorbb"]
 [[schema]]
 id = "qalc-path"
 title = "qalc binary path"
-type = { file-path = { default = "qalc" } }
+type = "file-path"
+default = "qalc"
 
 [[commands]]
 id = "copy"

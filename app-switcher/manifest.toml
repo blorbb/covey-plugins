@@ -5,12 +5,16 @@ authors = ["blorbb"]
 [[schema]]
 id = "something"
 title = "Something here"
-type = { text = { min-length = 10, max-length = 20 } }
+type = "text"
+min-length = 10
+max-length = 20
 
 [[schema]]
 id = "int"
 title = "Integer"
-type = { int = { min = 0, default = 1 } }
+type = "int"
+min = 0
+default = 1
 
 [[schema]]
 id = "bool"
@@ -21,7 +25,8 @@ type = "bool"
 [[schema]]
 id = "file"
 title = "File path"
-type = { file-path = { extension = ["md"] } }
+type = "file-path"
+extension = ["md"]
 
 [[schema]]
 id = "file-any"
@@ -38,20 +43,25 @@ type = "folder-path"
 [[schema]]
 id = "list"
 title = "List of text"
-type = { list = { item-type = "text", min-items = 1 } }
+type = "list"
+item-type = "text"
+min-items = 1
 
 [[schema]]
 id = "struct-thing"
 title = "Some struct"
-type = { struct = { fields = { thing = "int", thing2 = "bool" } } }
+type = "struct"
+fields = { thing = "int", thing2 = "bool" }
 
 [[schema]]
 id = "selection-thing"
 title = "Some selection"
-type.selection.allowed-values = ["this", "thing", "or", "that-thing"]
+type = "selection"
+allowed-values = ["this", "thing", "or", "that-thing"]
 
 [[schema]]
 id = "selection-thing-with-default"
 title = "Some selection with default"
-type.selection.allowed-values = ["this", "thing", "or", "that-thing"]
-type.selection.default = "that-thing"
+type = "selection"
+allowed-values = ["this", "thing", "or", "that-thing"]
+default = "that-thing"
